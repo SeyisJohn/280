@@ -1,0 +1,30 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.7</VERSION>
+ <DEVICE>"ATmega324A"</DEVICE>
+ <WORKING_DIR>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m324adef.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\Debug\var_delay_verification.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>var_delay_verification.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>var_delay_verification.map</FILE>
+  <FILE>var_delay_verification.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <RESET><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\main.asm</FILE><LINE>28</LINE></RESET>
+  <var_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\main.asm</FILE><LINE>43</LINE></var_delay>
+  <outer_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\main.asm</FILE><LINE>44</LINE></outer_loop>
+  <inner_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\var_delay_verification\var_delay_verification\main.asm</FILE><LINE>46</LINE></inner_loop>
+ </LABELS>
+</ASSEMBLER_INFO>

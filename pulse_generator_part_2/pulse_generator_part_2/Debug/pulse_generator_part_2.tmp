@@ -1,0 +1,111 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.7</VERSION>
+ <DEVICE>"ATmega324A"</DEVICE>
+ <WORKING_DIR>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m324adef.inc</FILE>
+  <FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\Debug\pulse_generator_part_2.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>pulse_generator_part_2.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>pulse_generator_part_2.map</FILE>
+  <FILE>pulse_generator_part_2.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <burst_count_setting_bcd><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>22</LINE></burst_count_setting_bcd>
+  <burst_count_setting_bin><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>23</LINE></burst_count_setting_bin>
+  <burst_count_bin><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>24</LINE></burst_count_bin>
+  <pulse_width_bcd><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>25</LINE></pulse_width_bcd>
+  <pulse_width><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>26</LINE></pulse_width>
+  <pulse_delay_bcd><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>27</LINE></pulse_delay_bcd>
+  <pulse_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>28</LINE></pulse_delay>
+  <line><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>29</LINE></line>
+  <RESET><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>49</LINE></RESET>
+  <init_lcd_dog><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>230</LINE></init_lcd_dog>
+  <clr_dsp_buffs><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>324</LINE></clr_dsp_buffs>
+  <update_lcd_dog><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>307</LINE></update_lcd_dog>
+  <dsp_buff_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>53</LINE></dsp_buff_1>
+  <after_peri><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>100</LINE></after_peri>
+  <get_key_value><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>507</LINE></get_key_value>
+  <display_the_value><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>341</LINE></display_the_value>
+  <idiot><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>107</LINE></idiot>
+  <switch_lines_up><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>139</LINE></switch_lines_up>
+  <we_back_from_switch_lines_up><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>111</LINE></we_back_from_switch_lines_up>
+  <switch_lines_down><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>126</LINE></switch_lines_down>
+  <we_back_from_switch_lines_down><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>114</LINE></we_back_from_switch_lines_down>
+  <compare_enter><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>150</LINE></compare_enter>
+  <we_back_from_Enter><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>117</LINE></we_back_from_Enter>
+  <prompt><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>211</LINE></prompt>
+  <store_value_line_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>177</LINE></store_value_line_1>
+  <dsp_buff_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>54</LINE></dsp_buff_2>
+  <store_value_line_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>188</LINE></store_value_line_2>
+  <dsp_buff_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>55</LINE></dsp_buff_3>
+  <store_value_line_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>199</LINE></store_value_line_3>
+  <get_key_value_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>523</LINE></get_key_value_3>
+  <convert_line1_to_Packed_BCD><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>456</LINE></convert_line1_to_Packed_BCD>
+  <convert_BCD_to_Binary><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>233</LINE></convert_BCD_to_Binary>
+  <convert_line2_to_Packed_BCD><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>473</LINE></convert_line2_to_Packed_BCD>
+  <convert_line3_to_Packed_BCD><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>490</LINE></convert_line3_to_Packed_BCD>
+  <re_init><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>248</LINE></re_init>
+  <BCD2bin16><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>620</LINE></BCD2bin16>
+  <check_flag><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>241</LINE></check_flag>
+  <check_zero><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>255</LINE></check_zero>
+  <generate_a_pulse><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>295</LINE></generate_a_pulse>
+  <pulse_generator><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>260</LINE></pulse_generator>
+  <var_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>548</LINE></var_delay>
+  <check_flag_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>271</LINE></check_flag_2>
+  <get_key_value_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>272</LINE></get_key_value_2>
+  <service_keypad_input><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>287</LINE></service_keypad_input>
+  <prompt1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>309</LINE></prompt1>
+  <store_bytes><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>331</LINE></store_bytes>
+  <keycode2keyvalue><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>535</LINE></keycode2keyvalue>
+  <lookup><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>536</LINE></lookup>
+  <keytable><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>634</LINE></keytable>
+  <outer_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>549</LINE></outer_loop>
+  <inner_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>551</LINE></inner_loop>
+  <mul10a><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>589</LINE></mul10a>
+  <mul10b><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>591</LINE></mul10b>
+  <m10_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\main.asm</FILE><LINE>608</LINE></m10_1>
+  <delay_30uS><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>74</LINE></delay_30uS>
+  <d30_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>78</LINE></d30_loop>
+  <v_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>107</LINE></v_delay>
+  <delay_40mS><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>126</LINE></delay_40mS>
+  <init_spi_lcd><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>142</LINE></init_spi_lcd>
+  <lcd_spi_transmit_CMD><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>168</LINE></lcd_spi_transmit_CMD>
+  <wait_transmit><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>177</LINE></wait_transmit>
+  <lcd_spi_transmit_DATA><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>198</LINE></lcd_spi_transmit_DATA>
+  <wait_transmit1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>209</LINE></wait_transmit1>
+  <start_dly_40ms><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>234</LINE></start_dly_40ms>
+  <func_set1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>238</LINE></func_set1>
+  <func_set2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>244</LINE></func_set2>
+  <bias_set><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>250</LINE></bias_set>
+  <power_ctrl><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>256</LINE></power_ctrl>
+  <follower_ctrl><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>263</LINE></follower_ctrl>
+  <contrast_set><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>269</LINE></contrast_set>
+  <display_on><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>276</LINE></display_on>
+  <clr_display><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>282</LINE></clr_display>
+  <entry_mode><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>288</LINE></entry_mode>
+  <wr_line1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>314</LINE></wr_line1>
+  <snd_ddram_addr><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>317</LINE></snd_ddram_addr>
+  <snd_buff_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>321</LINE></snd_buff_1>
+  <init_for_buff_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>330</LINE></init_for_buff_2>
+  <wr_line2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>333</LINE></wr_line2>
+  <snd_ddram_addr2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>336</LINE></snd_ddram_addr2>
+  <snd_buff_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>340</LINE></snd_buff_2>
+  <init_for_buff_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>349</LINE></init_for_buff_3>
+  <wr_line3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>351</LINE></wr_line3>
+  <snd_ddram_addr3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>354</LINE></snd_ddram_addr3>
+  <snd_buff_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pulse_generator_part_2\pulse_generator_part_2\lcd_dog_asm_driver_m324a.inc</FILE><LINE>360</LINE></snd_buff_3>
+ </LABELS>
+</ASSEMBLER_INFO>

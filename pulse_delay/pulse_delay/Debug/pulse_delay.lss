@@ -1,0 +1,769 @@
+
+AVRASM ver. 2.2.7  F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm Fri Nov 15 16:24:45 2019
+
+F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm(675): warning: Register r14 already defined by the .DEF directive
+F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm(676): warning: Register r15 already defined by the .DEF directive
+F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm(702): Including file 'F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\lcd_dog_asm_driver_m324a.inc'
+F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\main.asm(702): Including file 'F:\whatevs\Lab9\LIVE\pulse_delay\pulse_delay\lcd_dog_asm_driver_m324a.inc'
+                                 
+                                 
+                                 ;*
+                                 ;* Title: programmable_pulse_generator_I
+                                 ;* Author: Seyi Olajuyi & Bassel El Amine
+                                 ;* Version: 1.0
+                                 ;* Last updated: 2019/11/07
+                                 ;* Target: ATmega 324
+                                 ;*
+                                 ;* DESCRIPTION
+                                 ;* 
+                                 ;* 
+                                 ;*
+                                 ;*
+                                 ;* VERSION HISTORY
+                                 ;* 1.0 Original version
+                                 ;***************************************************************************
+                                 .list
+                                 
+                                 .dseg	;The variable below are in SRAM
+000100                           burst_count_setting_bcd:		.byte 3; setting unpacked BCD ;THIS HAS THREE BTYE allocated to the variable name
+000103                           burst_count_setting_bin:		.byte 1; setting in binary
+000104                           burst_count_bin:				.byte 1; pulses left to generated in burst
+000105                           pulse_width_bcd:				.byte 3
+000108                           pulse_width:					.byte 1
+000109                           pulse_delay_bcd:				.byte 3
+00010c                           pulse_delay:					.byte 1
+00010d                           line:							.byte 3
+                                 
+                                      
+                                 ;burst_count_setting_bcd is right most digit and
+                                 ; (burst_count_setting_bcd + 2) is the left most digit 
+                                 	 
+                                 	 .CSEG
+                                 
+                                 
+                                      ; interrupt vector table, with several 'safety' stubs
+000000 c002                           rjmp RESET      ;Reset/Cold start vector
+000001 9518                           reti            ;External Intr0 vector
+000002 9518                           reti            ;External Intr1 vector
+                                 
+                                 	
+                                 ;**********************************************************************
+                                 ;************* M A I N   A P P L I C A T I O N   C O D E  *************
+                                 ;**********************************************************************
+                                 
+                                 
+                                 RESET:
+000003 ef0f                          ldi r16, low(RAMEND)  ; init stack/pointer
+000004 bf0d                          out SPL, r16          ;
+000005 e008                          ldi r16, high(RAMEND) ;
+000006 bf0e                          out SPH, r16
+                                 
+                                 
+000007 ef0f                          ldi r16, $ff      ; load r16 with all 1s.
+000008 b904                          out DDRB, r16     ; set portB = output
+000009 e010                      	ldi r17, $00	  ; load r17 with all 0s.
+00000a b91a                      	out DDRD, r17	  ; set portD = input
+00000b e00f                      	ldi r16, $0f
+00000c b90b                      	out PORTD, r16    ; enable pull-up resistor on PD0-PD3
+00000d 9a0f                      	sbi DDRA, 7		  ; Set Pin 7(PORTA) to Output
+00000e 9a0a                      	sbi DDRA, 2		  ; Set Pin 2(PORTA) to Output
+00000f 980b                      	cbi DDRA, 3       ; Set Pin 3(PORTA) to Input
+000010 980c                      	cbi DDRA, 4		  ; Set Pin 4(PORTA) to Input
+000011 e820                      	ldi r18, $80	  ; load r18 with $80
+000012 b927                      	out DDRC, r18     ; set pin 6 to input & set pin 7 to output(also set all other pins to input)
+000013 9847                      	cbi PORTC, 7	  ; activate CLR on Flip Flop(Keypad)
+000014 9a47                      	sbi PORTC, 7      ; Deactivate CLR on Flip Flop(Keypad)
+                                 
+000015 9812                      	cbi PORTA, 2	  ; activate CLR on Flip Flop(PushButton)
+000016 9a12                      	sbi PORTA, 2      ; Deactivate CLR on Flip Flop(PushButton)
+000017 9a2c                          sbi portB, 4      ; set /SS of DOG LCD = 1 (Deselected)
+                                 	
+                                 
+000018 d1d1                          rcall init_lcd_dog        ; init display, using SPI serial interface    
+000019 d069                      	rcall clr_dsp_buffs       ; clear all three buffer lines
+00001a d1ed                      	rcall update_lcd_dog      ; update the display
+                                 
+00001b e0d1                      	ldi YH, high (dsp_buff_1) ; Load YH and YL as a pointer to 1st
+00001c e1c0                          ldi YL, low (dsp_buff_1)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 
+                                 	; RESET THE VARIABLES WITH ZERO
+00001d 9310 0102                 	sts burst_count_setting_bcd + 2, r17	
+00001f 9310 0101                 	sts burst_count_setting_bcd + 1, r17	
+000021 9310 0100                 	sts burst_count_setting_bcd + 0, r17	
+000023 9310 0104                 	sts burst_count_bin, r17
+                                 
+000025 e00a                      	ldi r16, 10
+000026 9300 0108                 	sts pulse_width, r16
+000028 9300 010c                 	sts pulse_delay, r16			  
+                                 	
+00002a e203                      	ldi r16, '#'
+00002b e210                      	ldi r17, ' '
+00002c 9300 010d                 	sts line, r16
+00002e 9310 010e                 	sts line + 1, r17
+000030 9310 010f                 	sts line + 2, r17
+                                 
+                                 ;****************************************************************
+                                 ;***********************CODE BEGINS******************************
+                                 ;****************************************************************
+                                 
+                                 ;This runs after the peripherals are initalized
+                                 after_peri:
+000032 940e 016a                 	call get_key_value						; get the value for the key
+000034 302a                      	cpi r18, $0A							; compare if r18 is equal to CLEAR
+000035 f7e1                      	brne after_peri							; it the key is not equal to clear, it will loop until it is
+                                 
+000036 d0b4                      	rcall display_the_value
+                                 
+                                 idiot:
+000037 d144                      	rcall get_key_value_4
+000038 fd43                      	sbrc r20, 3
+000039 c00f                      		rjmp prompt
+00003a fd46                      	sbrc r20, 6
+00003b c001                      		rjmp none_polling
+00003c cffa                      rjmp idiot
+                                 
+                                 none_polling:
+00003d d136                      	rcall get_key_value_3
+00003e 302f                      	cpi r18, $0F			; compare key value to Up arrow
+00003f f409                      	brne we_back_from_switch_lines_up
+000040 d057                      	rcall switch_lines_up
+                                 we_back_from_switch_lines_up:
+000041 302e                      	cpi r18, $0E			; compare key value to down arrow
+000042 f409                      	brne we_back_from_switch_lines_down
+000043 d047                      	rcall switch_lines_down
+                                 we_back_from_switch_lines_down:
+000044 302c                      	cpi r18, $0C			; compare key value to ENTER
+000045 f409                      	brne we_back_from_Enter
+000046 d08e                      	rcall compare_enter
+                                 we_back_from_Enter:
+000047 d0a3                      	rcall display_the_value
+000048 cfee                      	rjmp idiot
+                                 
+                                 
+                                 prompt:
+                                 
+000049 d0fc                      	rcall convert_line1_to_Packed_BCD
+00004a d09d                      	rcall convert_BCD_to_Binary
+00004b 92e0 0103                 	sts burst_count_setting_bin, r14		; Store the value of r17 into burst_count_setting_bin
+00004d 92e0 0104                 	sts burst_count_bin, r14				; Store the value of r17 into burst_count_bin
+                                 	
+                                 
+00004f d102                      	rcall convert_line2_to_Packed_BCD
+000050 d097                      	rcall convert_BCD_to_Binary
+000051 92e0 0108                 	sts pulse_width, r14
+                                 	
+                                 	
+000053 d10a                      	rcall convert_line3_to_Packed_BCD
+000054 d093                      	rcall convert_BCD_to_Binary
+000055 92e0 010c                 	sts pulse_delay, r14
+                                 
+                                 		
+                                 ;This is really useful when we want to generate another set of pulses
+                                 re_init:
+000057 9812                      	cbi PORTA, 2						    ; Activate the flip-flop that is connected to the push button
+000058 9a12                      	sbi PORTA, 2		                    ; Deactivate the flip-flop that is connected to the push button
+                                 	
+                                 	;lds r16, pulse_width					; Load pulse_width into r16, This is to create the delay
+000059 9130 0104                 	lds r19, burst_count_bin				; This loads r19 with the orginal binary value	
+                                 
+                                 check_zero:
+00005b 3030                      	cpi r19, $00
+00005c f0c1                      	breq generate_a_pulse
+                                 
+                                 ;This generate a pulse that is supposed to be n ms wide
+                                 pulse_generator:
+00005d 9100 0108                 	lds r16, pulse_width					; Load pulse_width into r16, This is to create the delay
+00005f 9a17                      	sbi PORTA, 7							; set bit for pulse
+000060 d128                      	rcall var_delay	
+000061 9817                      	cbi PORTA, 7							; clear bit for pulse 
+000062 9100 010c                 	lds r16, pulse_delay					; Load pulse_width into r16, This is to create the delay
+000064 d124                      	rcall var_delay	
+000065 953a                      	dec r19									; decrement the binary value
+000066 f7b1                      	brne pulse_generator	
+                                 
+                                 ;This part is reached if the binary value is equal to zero
+                                 check_flag_2:
+                                 get_key_value_2:
+                                 
+000067 b140                      	in r20, PINA						; Read in PIN A, used to read in the value for bit3 in Pin A
+000068 b156                      	in r21, PINC						; Read in PIN C, used to read in the value for bit6
+                                 
+000069 7048                      	andi r20, $08						; Mask r20, used to compare third bit in r20
+00006a 7450                      	andi r21, $40						; Mask r21, used to compare sixth bit in r21
+                                 
+00006b 3048                      	cpi r20, $08						; Check if the flip-flop that is connected to push button is set
+00006c f351                      	breq re_init
+                                 
+00006d 3450                      	cpi r21, $40						; Check if the flip-flop that is connected to the keypad is set
+00006e f009                      	breq service_keypad_input
+00006f cff7                      	rjmp get_key_value_2
+                                 
+                                 service_keypad_input:
+000070 d0f9                      	rcall get_key_value
+                                 
+000071 302a                      	cpi r18, $0A							; checks if the key value is equal to CLEAR
+000072 f221                      	breq idiot							; goes to the beginning if the key value is equal to CLEAR
+000073 940c 0067                 	jmp check_flag_2							; goes back to generate another set of pulses
+                                 
+                                 
+                                 generate_a_pulse:
+000075 9100 0108                 	lds r16, pulse_width					; Load pulse_width into r16, This is to create the delay
+000077 9a17                      	sbi PORTA, 7							; set bit for pulse
+000078 d110                      	rcall var_delay	
+000079 9817                      	cbi PORTA, 7							; clear bit for pulse 
+00007a 9100 010c                 	lds r16, pulse_delay					; Load pulse_width into r16, This is to create the delay
+00007c d10c                      	rcall var_delay	
+                                 
+00007d 9b36                      	sbis PINC, 6 
+00007e cff6                      	rjmp generate_a_pulse							; decrement the binary value
+00007f d0f4                      	rcall get_key_value_3
+000080 302a                      	cpi r18, $0A
+000081 f001                      	breq prompt1
+                                 
+                                 	prompt1:
+000082 cfb4                      	rjmp idiot
+                                 
+                                 ;---------------------------- SUBROUTINES ----------------------------
+                                 
+                                 ;************************
+                                 ;NAME:      clr_dsp_buffs
+                                 ;FUNCTION:  Initializes dsp_buffers 1, 2, and 3 with blanks (0x20)
+                                 ;ASSUMES:   Three CONTIGUOUS 16-byte dram based buffers named
+                                 ;           dsp_buff_1, dsp_buff_2, dsp_buff_3.
+                                 ;RETURNS:   nothing.
+                                 ;MODIFIES:  r25,r26, Z-ptr
+                                 ;CALLS:     none
+                                 ;CALLED BY: main application and diagnostics
+                                 ;********************************************************************
+                                 clr_dsp_buffs:
+000083 e390                           ldi R25, 48			; load total length of both buffer.
+000084 e2a0                           ldi R26, ' '              ; load blank/space into R26.
+000085 e0f1                           ldi ZH, high (dsp_buff_1) ; Load ZH and ZL as a pointer to 1st
+000086 e1e0                           ldi ZL, low (dsp_buff_1)  ; byte of buffer for line 1.
+                                    
+                                     ;set DDRAM address to 1st position of first line.
+                                 store_bytes:
+000087 93a1                           st  Z+, R26       ; store ' ' into 1st/next buffer byte and
+                                                        ; auto inc ptr to next location.
+000088 959a                           dec  R25          ; 
+000089 f7e9                           brne store_bytes  ; cont until r25=0, all bytes written.
+00008a 9508                           ret
+                                 
+                                 
+                                 ;**************************************
+                                 ;SUBROUTINE FOR SWITCHING LINES DOWN
+                                 ;************************************
+                                 switch_lines_down:
+00008b 9100 010d                 	lds r16, line
+00008d 9110 010e                 	lds r17, line + 1
+00008f 9120 010f                 	lds r18, line + 2
+                                 
+000091 9300 010e                 	sts line + 1, r16
+000093 9310 010f                 	sts line + 2, r17
+000095 9320 010d                 	sts line, r18
+                                 
+000097 9508                      	ret
+                                 
+                                 ;***************************************
+                                 ;SUBROUTINE FOR SWITCHING LINES UP
+                                 ;***************************************
+                                 switch_lines_up:
+000098 9100 010d                 	lds r16, line
+00009a 9110 010e                 	lds r17, line + 1
+00009c 9120 010f                 	lds r18, line + 2
+                                 
+00009e 9300 010f                 	sts line + 2, r16
+0000a0 9320 010e                 	sts line + 1, r18
+0000a2 9310 010d                 	sts line, r17
+                                 
+0000a4 9508                      	ret
+                                 
+                                 
+                                 ;*************************************
+                                 ;SUBROUTINE FOR STORING LINE 1
+                                 ;*************************************
+                                 store_value_line_1:
+0000a5 d0c4                      	rcall get_key_value
+0000a6 302a                      	cpi r18, $0A							; if key value is not a number, end the subroutine.
+0000a7 f008                      	brlo skip_line_1
+0000a8 9508                      	ret
+                                 skip_line_1:
+0000a9 9100 0101                 	lds r16, burst_count_setting_bcd + 1	; Load r16 with the middle digit
+0000ab 9300 0102                 	sts burst_count_setting_bcd + 2, r16	; Put the middle digit into the leftmost digit
+                                 
+0000ad 9100 0100                 	lds r16, burst_count_setting_bcd + 0	; Load r16 with the Rightmost digit
+0000af 9300 0101                 	sts burst_count_setting_bcd + 1, r16	; Put the rightmost digit into the middle digit
+                                 
+0000b1 9320 0100                 	sts burst_count_setting_bcd + 0, r18	; Store the new number into the rightmost digit
+                                 
+0000b3 d037                      	rcall display_the_value
+0000b4 cff0                      	rjmp store_value_line_1
+                                 
+                                 
+                                 ;*********************************
+                                 ;SUBROUTINE FOR STORING LINE 2
+                                 ;********************************
+                                 store_value_line_2:
+0000b5 d0b4                      	rcall get_key_value	
+0000b6 302a                      	cpi r18, $0A							; if key value is not a number, end the subroutine.
+0000b7 f008                      	brlo skip_line_2
+0000b8 9508                      	ret
+                                 skip_line_2:
+0000b9 9100 0106                 	lds r16, pulse_width_bcd + 1	; Load r16 with the middle digit
+0000bb 9300 0107                 	sts pulse_width_bcd + 2, r16	; Put the middle digit into the leftmost digit
+                                 
+0000bd 9100 0105                 	lds r16, pulse_width_bcd + 0	; Load r16 with the Rightmost digit
+0000bf 9300 0106                 	sts pulse_width_bcd + 1, r16	; Put the rightmost digit into the middle digit
+                                 
+0000c1 9320 0105                 	sts pulse_width_bcd + 0, r18	; Store the new number into the rightmost digit
+                                 
+0000c3 d027                      	rcall display_the_value
+0000c4 cff0                      	rjmp store_value_line_2
+                                 
+                                 
+                                 ;**************************************
+                                 ;SUBROUTINE FOR STORING LINE 3
+                                 ;*************************************
+                                 store_value_line_3:
+0000c5 d0a4                      	rcall get_key_value
+0000c6 302a                      	cpi r18, $0A
+0000c7 f008                      	brlo skip_line_3
+0000c8 9508                      	ret
+                                 
+                                 skip_line_3:
+0000c9 9100 010a                 	lds r16, pulse_delay_bcd + 1	; Load r16 with the middle digit
+0000cb 9300 010b                 	sts pulse_delay_bcd + 2, r16	; Put the middle digit into the leftmost digit
+                                 
+0000cd 9100 0109                 	lds r16, pulse_delay_bcd + 0	; Load r16 with the Rightmost digit
+0000cf 9300 010a                 	sts pulse_delay_bcd + 1, r16	; Put the rightmost digit into the middle digit
+                                 
+0000d1 9320 0109                 	sts pulse_delay_bcd + 0, r18	; Store the new number into the rightmost digit
+                                 	
+0000d3 d017                      	rcall display_the_value
+0000d4 cff0                      	rjmp store_value_line_3
+                                 
+                                 
+                                 ;*************************************
+                                 ;SUBROUTINE FOR COMPARING THE ENTER
+                                 ;************************************
+                                 compare_enter:
+0000d5 e0d1                      	ldi YH, high (dsp_buff_1 + 8) ; Load YH and YL as a pointer to 1st
+0000d6 e1c8                          ldi YL, low (dsp_buff_1 + 8)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 	
+0000d7 8108                      	ld r16, Y					  ; Retrieve character from buffer
+0000d8 3203                      	cpi r16, '#'				  ; Compare the registers with #
+0000d9 f409                      	brne store_line_2
+0000da dfca                      	rcall store_value_line_1	
+                                 			
+                                 store_line_2:
+0000db e0d1                      	ldi YH, high (dsp_buff_2 + 8) ; Load YH and YL as a pointer to 1st
+0000dc e2c8                          ldi YL, low (dsp_buff_2 + 8)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 
+0000dd 8108                      	ld r16, Y
+0000de 3203                      	cpi r16, '#'
+0000df f409                      	brne store_line_3
+0000e0 dfd4                      	rcall store_value_line_2
+                                 
+                                 store_line_3:
+0000e1 e0d1                      	ldi YH, high (dsp_buff_3 + 8) ; Load YH and YL as a pointer to 1st
+0000e2 e3c8                          ldi YL, low (dsp_buff_3 + 8)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 
+0000e3 8108                      	ld r16, Y
+0000e4 3203                      	cpi r16, '#'
+0000e5 f409                      	brne end_comparing 
+0000e6 dfde                      	rcall store_value_line_3
+                                 end_comparing:
+0000e7 9508                      	ret
+                                 
+                                 
+                                 ;********************************************************************************
+                                 ;This calls the subroutine that converts the Packed BCD into the 16-bit binary
+                                 ;********************************************************************************
+                                 convert_BCD_to_Binary:
+0000e8 940e 01a1                 	call BCD2bin16
+0000ea 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR DISPLAYING THE INPUT TO LCD
+                                 ;**********************************************
+                                 display_the_value:
+                                 
+0000eb e0d1                      	ldi YH, high (dsp_buff_1) ; Load YH and YL as a pointer to 1st
+0000ec e1c0                          ldi YL, low (dsp_buff_1)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 
+0000ed e60e                      	ldi r16, 'n'
+0000ee 9309                      	st Y+, r16
+0000ef e200                      	ldi r16, ' '
+0000f0 9309                      	st Y+, r16
+0000f1 e30d                      	ldi r16, '='
+0000f2 9309                      	st Y+, r16
+0000f3 e200                      	ldi r16, ' '
+0000f4 9309                      	st Y+, r16
+                                 
+0000f5 e310                      	ldi r17, $30							; Load $30 into r16
+                                 	; store the ascii representation of the digit in the buffer
+0000f6 9100 0102                 	lds r16, (burst_count_setting_bcd + 2)			; Store the leftmost keyvalue into r16
+                                 	
+0000f8 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+0000f9 9309                      	st Y+, r16										; Put the value into the display buffer
+                                 	
+0000fa 9100 0101                 	lds r16, (burst_count_setting_bcd + 1)			; 
+0000fc 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+0000fd 9309                      	st Y+, r16
+                                 
+0000fe 9100 0100                 	lds r16, (burst_count_setting_bcd + 0)			; Store the rightmost keyvalue into r16
+000100 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+000101 9309                      	st Y+, r16										; Put the value into the display buffer	
+                                 	
+000102 e200                      	ldi r16, ' '
+000103 9309                      	st Y+, r16
+                                 
+000104 9100 010d                 	lds r16, line
+000106 9309                      	st Y+, r16
+                                 
+000107 940e 0208                 	call update_lcd_dog								; update the display
+                                 
+000109 e0d1                      	ldi YH, high (dsp_buff_2) ; Load YH and YL as a pointer to 1st
+00010a e2c0                          ldi YL, low (dsp_buff_2)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 
+00010b e704                      	ldi r16, 't'
+00010c 9309                      	st Y+, r16
+00010d e200                      	ldi r16, ' '
+00010e 9309                      	st Y+, r16
+00010f e30d                      	ldi r16, '='
+000110 9309                      	st Y+, r16
+000111 e200                      	ldi r16, ' '
+000112 9309                      	st Y+, r16
+                                 	
+000113 e310                      	ldi r17, $30							; Load $30 into r16
+                                 	; store the ascii representation of the digit in the buffer
+000114 9100 0107                 	lds r16, (pulse_width_bcd + 2)			; Store the leftmost keyvalue into r16
+                                 	
+000116 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+000117 9309                      	st Y+, r16										; Put the value into the display buffer
+                                 	
+000118 9100 0106                 	lds r16, (pulse_width_bcd + 1)			; 
+00011a 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+00011b 9309                      	st Y+, r16
+                                 
+00011c 9100 0105                 	lds r16, (pulse_width_bcd + 0)			; Store the rightmost keyvalue into r16
+00011e 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+00011f 9309                      	st Y+, r16								; Put the value into the display buffer	
+                                 
+000120 e200                      	ldi r16, ' '
+000121 9309                      	st Y+, r16
+                                 
+000122 9100 010e                 	lds r16, line + 1
+000124 9309                      	st Y+, r16
+                                 
+000125 940e 0208                 	call update_lcd_dog								; update the display
+                                 
+000127 e0d1                      	ldi YH, high (dsp_buff_3) ; Load YH and YL as a pointer to 1st
+000128 e3c0                          ldi YL, low (dsp_buff_3)  ; byte of dsp_buff_3 (Note - assuming 
+                                                               ; (dsp_buff_3 for now).
+                                 
+000129 e604                      	ldi r16, 'd'
+00012a 9309                      	st Y+, r16
+00012b e200                      	ldi r16, ' '
+00012c 9309                      	st Y+, r16
+00012d e30d                      	ldi r16, '='
+00012e 9309                      	st Y+, r16
+00012f e200                      	ldi r16, ' '
+000130 9309                      	st Y+, r16
+                                 	
+000131 e310                      	ldi r17, $30							; Load $30 into r16
+                                 	; store the ascii representation of the digit in the buffer
+000132 9100 010b                 	lds r16, (pulse_delay_bcd + 2)			; Store the leftmost keyvalue into r16
+                                 	
+000134 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+000135 9309                      	st Y+, r16										; Put the value into the display buffer
+                                 	
+000136 9100 010a                 	lds r16, (pulse_delay_bcd + 1)			; 
+000138 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+000139 9309                      	st Y+, r16
+                                 
+00013a 9100 0109                 	lds r16, (pulse_delay_bcd + 0)			; Store the rightmost keyvalue into r16
+00013c 2b01                      	or r16, r17								; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+00013d 9309                      	st Y+, r16								; Put the value into the display buffer	
+                                 
+00013e e200                      	ldi r16, ' '
+00013f 9309                      	st Y+, r16
+                                 
+000140 9100 010f                 	lds r16, line + 2
+000142 9309                      	st Y+, r16
+                                 
+000143 940e 0208                 	call update_lcd_dog								; update the display
+000145 9508                      	ret
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert the line 1 to PACKED BCD
+                                 ;****************************************************
+                                 convert_line1_to_Packed_BCD:
+000146 9100 0100                 	lds r16, burst_count_setting_bcd		; Retrieve the value store in the FIRST byte of burst_count_setting_bcd	and store it in r16	
+000148 9110 0101                 	lds r17, burst_count_setting_bcd + 1	; Retrieve the value store in the SECOND byte of burst_count_setting_bcd and store it in r17
+00014a 9120 0102                 	lds r18, burst_count_setting_bcd + 2	; Retrieve the value store in the THIRD byte of burst_count_setting_bcd and store it in r18
+                                 
+00014c 9512                      	swap r17								; Swap the nibble in r17								
+00014d 2b01                      	or r16, r17								; Or r16 & r17, Combine the two contents of two registers into one register (r16)
+00014e 702f                      	andi r18, $0F							; AND r18 & $0F, clear the high nibble of r18
+00014f 2f12                      	mov r17, r18							; Move the content of r18 into r17
+000150 e020                      	ldi r18, $00							; Load r18 with zero, this will be useful when we are trying to convert
+                                 											; Packed BCD into a 16-bit
+000151 9508                      	ret 
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert the line 2 to PACKED BCD
+                                 ;****************************************************
+                                 convert_line2_to_Packed_BCD:
+000152 9100 0105                 	lds r16, pulse_width_bcd				
+000154 9110 0106                 	lds r17, pulse_width_bcd + 1	
+000156 9120 0107                 	lds r18, pulse_width_bcd + 2	
+                                 
+000158 9512                      	swap r17								; Swap the nibble in r17								
+000159 2b01                      	or r16, r17								; Or r16 & r17, Combine the two contents of two registers into one register (r16)
+00015a 702f                      	andi r18, $0F							; AND r18 & $0F, clear the high nibble of r18
+00015b 2f12                      	mov r17, r18							; Move the content of r18 into r17
+00015c e020                      	ldi r18, $00							; Load r18 with zero, this will be useful when we are trying to convert
+                                 											; Packed BCD into a 16-bit
+00015d 9508                      	ret 
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert the line 3 to PACKED BCD
+                                 ;****************************************************
+                                 convert_line3_to_Packed_BCD:
+00015e 9100 0109                 	lds r16, pulse_delay_bcd				
+000160 9110 010a                 	lds r17, pulse_delay_bcd + 1	
+000162 9120 010b                 	lds r18, pulse_delay_bcd + 2	
+                                 
+000164 9512                      	swap r17								; Swap the nibble in r17								
+000165 2b01                      	or r16, r17								; Or r16 & r17, Combine the two contents of two registers into one register (r16)
+000166 702f                      	andi r18, $0F							; AND r18 & $0F, clear the high nibble of r18
+000167 2f12                      	mov r17, r18							; Move the content of r18 into r17
+000168 e020                      	ldi r18, $00							; Load r18 with zero, this will be useful when we are trying to convert
+                                 											; Packed BCD into a 16-bit
+000169 9508                      	ret 
+                                 
+                                 
+                                 ;**********************************
+                                 ;SUBROUTINE FOR RETRIEVING INPUT(PART 1)
+                                 ;*********************************
+                                 get_key_value:
+00016a 9b36                      	sbis PINC, 6			; Check if any value on the keypad is press
+00016b cffe                      	rjmp get_key_value		; Loop back if no keypad is pressed
+00016c b129                      	in r18, PIND			; Store the Input into r18
+00016d 7f20                      	andi r18, $F0			; Clear the low nibble of r18
+00016e 9522                      	swap r18				; Swap the nibble
+00016f 940e 0182                 	call keycode2keyvalue	; Convert the input into HEXVALUES (NOT ASCII)
+000171 9847                      	cbi PORTC, 7			; Clear the FLip Flop that is connected to the encoder
+000172 9a47                      	sbi PORTC, 7			;
+000173 9508                      	ret
+                                 
+                                 
+                                 
+                                 ;**********************************
+                                 ;SUBROUTINE FOR RETRIEVING INPUT(PART 2)
+                                 ;*********************************
+                                 get_key_value_3:
+000174 b129                      	in r18, PIND			; Store the Input into r18
+000175 7f20                      	andi r18, $F0			; Clear the low nibble of r18
+000176 9522                      	swap r18				; Swap the nibble
+000177 940e 0182                 	call keycode2keyvalue	; Convert the input into HEXVALUES (NOT ASCII)
+000179 9847                      	cbi PORTC, 7			; Clear the FLip Flop that is connected to the encoder
+00017a 9a47                      	sbi PORTC, 7			;
+00017b 9508                      	ret
+                                 
+                                 
+                                 
+                                 ;**********************************
+                                 ;SUBROUTINE FOR RETRIEVING INPUT(PART 3)
+                                 ;*********************************
+                                 get_key_value_4:
+00017c b140                      	in r20, PINA						; Read in PIN A, used to read in the value for bit3 in Pin A
+00017d b156                      	in r21, PINC						; Read in PIN C, used to read in the value for bit6
+                                 
+00017e 7048                      	andi r20, $08						; Mask r20, used to compare third bit in r20
+00017f 7450                      	andi r21, $40						; Mask r21, used to compare sixth bit in r21
+                                 
+000180 2b45                      	or r20, r21
+                                 
+000181 9508                      	ret
+                                 
+                                 ;********************************
+                                 ;SUBROUTINE FOR LOOKUP TABLE
+                                 ;******************************
+                                 keycode2keyvalue:
+                                 lookup:
+000182 e0f3                      	ldi ZH, high (keytable * 2)		;set Z to point to start of table 
+000183 e5ea                      	ldi ZL, low (keytable * 2)
+000184 e000                      	ldi r16, $00					;add offset to Z pointer 
+000185 0fe2                      	add ZL, r18						;originally r18
+000186 0ff0                      	add ZH, r16
+000187 9124                      	lpm r18, Z	
+000188 9508                      	ret
+                                 
+                                 ;**************************
+                                 ;SUBROUTINE FOR DELAY
+                                 ;************************
+                                 var_delay: ;delay for ATmega324 @ 1MHz = r16 * 0.1 ms
+                                 outer_loop:; r16 should equal to 10	
+000189 e210                      	ldi r17, 32
+                                 inner_loop:
+00018a 951a                      	dec r17
+00018b f7f1                      	brne inner_loop
+00018c 950a                      	dec r16
+00018d f7d9                      	brne outer_loop
+00018e 9508                      	ret
+                                 
+                                 
+                                 ;***************************************************************************
+                                 ;*
+                                 ;* "BCD2bin16" - BCD to 16-Bit Binary Conversion
+                                 ;*
+                                 ;* This subroutine converts a 5-digit packed BCD number represented by 
+                                 ;* 3 bytes (fBCD2:fBCD1:fBCD0) to a 16-bit number (tbinH:tbinL).
+                                 ;* MSD of the 5-digit number must be placed in the lowermost nibble of fBCD2.
+                                 ;* 
+                                 ;* Let "abcde" denote the 5-digit number. The conversion is done by
+                                 ;* computing the formula: 10(10(10(10a+b)+c)+d)+e.
+                                 ;* The subroutine "mul10a"/"mul10b" does the multiply-and-add operation 
+                                 ;* which is repeated four times during the computation.
+                                 ;*  
+                                 ;* Number of words	:30 
+                                 ;* Number of cycles	:108 
+                                 ;* Low registers used	:4 (copyL,copyH,mp10L/tbinL,mp10H/tbinH)
+                                 ;* High registers used  :4 (fBCD0,fBCD1,fBCD2,adder)	
+                                 ;*
+                                 ;***************************************************************************
+                                 
+                                 ;***** "mul10a"/"mul10b" Subroutine Register Variables
+                                 
+                                 .def	copyL	=r12		;temporary register
+                                 .def	copyH	=r13		;temporary register
+                                 .def	mp10L	=r14		;Low byte of number to be multiplied by 10
+                                 .def	mp10H	=r15		;High byte of number to be multiplied by 10
+                                 .def	adder	=r19		;value to add after multiplication	
+                                 
+                                 ;***** Code
+                                 
+                                 mul10a:	;***** multiplies "mp10H:mp10L" with 10 and adds "adder" high nibble 
+00018f 9532                      	swap	adder
+                                 mul10b:	;***** multiplies "mp10H:mp10L" with 10 and adds "adder" low nibble 
+000190 2cce                      	mov	copyL,mp10L	;make copy
+000191 2cdf                      	mov	copyH,mp10H
+000192 0cee                      	lsl	mp10L		;multiply original by 2
+000193 1cff                      	rol	mp10H
+000194 0ccc                      	lsl	copyL		;multiply copy by 2
+000195 1cdd                      	rol	copyH		
+000196 0ccc                      	lsl	copyL		;multiply copy by 2 (4)
+000197 1cdd                      	rol	copyH		
+000198 0ccc                      	lsl	copyL		;multiply copy by 2 (8)
+000199 1cdd                      	rol	copyH		
+00019a 0cec                      	add	mp10L,copyL	;add copy to original
+00019b 1cfd                      	adc	mp10H,copyH	
+00019c 703f                      	andi	adder,0x0f	;mask away upper nibble of adder
+00019d 0ee3                      	add	mp10L,adder	;add lower nibble of adder
+00019e f408                      	brcc	m10_1		;if carry not cleared
+00019f 94f3                      	inc	mp10H		;	inc high byte
+0001a0 9508                      m10_1:	ret	
+                                 
+                                 ;***** Main Routine Register Variables
+                                 
+                                 .def	tbinL	=r14		;Low byte of binary result (same as mp10L)
+                                 .def	tbinH	=r15		;High byte of binary result (same as mp10H)
+                                 .def	fBCD0	=r16		;BCD value digits 1 and 0
+                                 .def	fBCD1	=r17		;BCD value digits 2 and 3
+                                 .def	fBCD2	=r18		;BCD value digit 5
+                                 
+                                 ;***** Code
+                                 
+                                 BCD2bin16:
+0001a1 702f                      	andi	fBCD2,0x0f	;mask away upper nibble of fBCD2
+0001a2 24ff                      	clr	mp10H		
+0001a3 2ee2                      	mov	mp10L,fBCD2	;mp10H:mp10L = a
+0001a4 2f31                      	mov	adder,fBCD1
+0001a5 dfe9                      	rcall	mul10a		;mp10H:mp10L = 10a+b
+0001a6 2f31                      	mov	adder,fBCD1
+0001a7 dfe8                      	rcall	mul10b		;mp10H:mp10L = 10(10a+b)+c
+0001a8 2f30                      	mov	adder,fBCD0		
+0001a9 dfe5                      	rcall	mul10a		;mp10H:mp10L = 10(10(10a+b)+c)+d
+0001aa 2f30                      	mov	adder,fBCD0
+0001ab dfe4                      	rcall	mul10b		;mp10H:mp10L = 10(10(10(10a+b)+c)+d)+e
+0001ac 9508                      	ret
+                                 	
+0001ad 0201
+0001ae 0f03
+0001af 0504
+0001b0 0e06
+0001b1 0807
+0001b2 0d09                      keytable: .db $01, $02, $03, $0F, $04, $05, $06, $0E, $07, $08, $09, $0D
+0001b3 000a
+0001b4 0c0b                      		.db $0A, $00, $0B, $0C
+                                       
+                                 
+                                 .list
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+"ATmega324A" register use summary:
+x  :   0 y  :  30 z  :   5 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   5 
+r13:   5 r14:   9 r15:   5 r16: 148 r17:  42 r18:  40 r19:  10 r20:  16 
+r21:   6 r22:   2 r23:   2 r24:   4 r25:   2 r26:   2 r27:   0 r28:   7 
+r29:   7 r30:   6 r31:   6 
+Registers used: 21 out of 35 (60.0%)
+
+"ATmega324A" instruction use summary:
+.lds  :   0 .sts  :   0 adc   :   1 add   :   4 adiw  :   0 and   :   0 
+andi  :  11 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   1 brcs  :   0 break :   0 breq  :   5 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   3 brlt  :   0 brmi  :   0 
+brne  :  17 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   7 cbi   :  12 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
+cpi   :  15 cpse  :   0 dec   :  10 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :  15 inc   :   1 jmp   :   1 
+ld    :   6 ldd   :   0 ldi   :  75 lds   :  38 lpm   :   2 lsl   :   4 
+lsr   :   0 mov   :  10 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   2 or    :  13 ori   :   0 out   :   9 pop   :   6 
+push  :   6 rcall :  70 ret   :  27 reti  :   2 rjmp  :  14 rol   :   4 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :  16 sbic  :   0 sbis  :   2 
+sbiw  :   0 sbr   :   0 sbrc  :   2 sbrs  :   2 sec   :   0 seh   :   0 
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :  28 std   :   0 sts   :  28 
+sub   :   0 subi  :   0 swap  :   6 tst   :   0 wdr   :   0 
+Instructions used: 38 out of 113 (33.6%)
+
+"ATmega324A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x00045a   1098     16   1114   32768   3.4%
+[.dseg] 0x000100 0x000140      0     64     64    2048   3.1%
+[.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
+
+Assembly complete, 0 errors, 2 warnings
