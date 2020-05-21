@@ -1,0 +1,38 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.7</VERSION>
+ <DEVICE>"ATmega324A"</DEVICE>
+ <WORKING_DIR>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m324adef.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\Debug\pos_edge_ints.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>pos_edge_ints.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>pos_edge_ints.map</FILE>
+  <FILE>pos_edge_ints.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <key_presses><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>23</LINE></key_presses>
+  <pb_presses><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>24</LINE></pb_presses>
+  <reset><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>28</LINE></reset>
+  <start><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>37</LINE></start>
+  <keypress_ISR><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>85</LINE></keypress_ISR>
+  <pb_press_ISR><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>125</LINE></pb_press_ISR>
+  <restore_values_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>94</LINE></restore_values_1>
+  <wait_for_bounce_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>126</LINE></wait_for_bounce_1>
+  <var_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>153</LINE></var_delay>
+  <restore_value_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>144</LINE></restore_value_2>
+  <outer_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>154</LINE></outer_loop>
+  <inner_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\pos_edge_ints\pos_edge_ints\pos_edge_ints\main.asm</FILE><LINE>156</LINE></inner_loop>
+ </LABELS>
+</ASSEMBLER_INFO>
