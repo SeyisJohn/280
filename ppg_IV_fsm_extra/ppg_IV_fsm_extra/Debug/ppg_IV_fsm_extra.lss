@@ -1,0 +1,1110 @@
+
+AVRASM ver. 2.2.7  C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\
+ppg_IV_fsm_extra\main.asm Thu Dec 05 18:05:47 2019
+
+C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\ppg_IV_fsm_extra\main.asm(24): 
+Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\
+1.3.300\avrasm\inc\m324adef.inc'
+C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\ppg_IV_fsm_extra\main.asm(780):
+ warning: Register r14 already defined by the .DEF directive
+C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\ppg_IV_fsm_extra\main.asm(781):
+ warning: Register r15 already defined by the .DEF directive
+C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\ppg_IV_fsm_extra\main.asm(949):
+ Including file 'C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\
+ ppg_IV_fsm_extra\lcd_dog_asm_driver_m324a.inc'
+C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\ppg_IV_fsm_extra\main.asm(24):
+ Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\
+ avrasm\inc\m324adef.inc'
+C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\ppg_IV_fsm_extra\main.asm(949):
+ Including file 'C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm_extra\
+ ppg_IV_fsm_extra\lcd_dog_asm_driver_m324a.inc'
+                                 
+                                 
+                                 ;***************************************************************************
+                                 ;*
+                                 ;* Title: ppg_IV_fsm
+                                 ;* Author:          Seyi Olajuyi & Bassel El Amine
+                                 ;* Version:         2.0
+                                 ;* Last updated:    12/05/19
+                                 ;* Target:          ATmega16 
+                                 ;*
+                                 ;* DESCRIPTION
+                                 ;* This is a simplified version of the table driven FSM. It handles only 255
+                                 ;* or less input symbols.
+                                 ;* 
+                                 ;* A sample table is included for a simple FSM. This table can be modified to
+                                 ;* handle any FSM by equating the input symbols to byte values starting at
+                                 ;* $00 and entering the appropriate next state and task subroutine names.
+                                 ;* 
+                                 ;*
+                                 ;* VERSION HISTORY
+                                 ;* 1.0 Original version
+                                 ;* 2.0 Subroutines moved to end of file
+                                 ;***************************************************************************
+                                 .list
+                                 
+                                 .dseg	;The variable below are in SRAM
+000100                           burst_count_setting_bcd:		.byte 3; setting unpacked BCD ;THIS HAS
+ THREE BTYE allocated to the variable name
+000103                           burst_count:					.byte 1; pulses left to generated in
+ burst
+000104                           pulse_width_bcd:				.byte 3
+000107                           pulse_width:					.byte 1
+000108                           pulse_delay_bcd:				.byte 3
+00010b                           pulse_delay:					.byte 1
+00010c                           line:							.byte 3
+00010f                           keyvalue:						.byte 1; stores the keyvalue into
+ a variable
+000110                           make_pulse:						.byte 1; 
+000111                           is_burst_zero:					.byte 1; Used to check if burst
+ count is equal to zero. 1 means burst count is equal to zero
+000112                           input:							.byte 1; input
+                                 
+                                      
+                                 ;burst_count_setting_bcd is right most digit and
+                                 ; (burst_count_setting_bcd + 2) is the left most digit 
+                                 
+                                 .cseg
+                                 reset:
+                                 .org RESET              ;reset interrupt vector
+000000 c004                          rjmp start          ;program starts here at reset
+                                 .org INT0addr           ;INT0 interrupt vector
+000002 c210                          rjmp keypress_ISR 
+                                 .org INT1addr
+000004 c23e                      	rjmp pb_press_ISR
+                                 
+                                 start:
+000005 ef0f                          ldi r16, LOW(RAMEND)    ;initialize SP to point to
+ top of stack
+000006 bf0d                          out SPL, r16
+000007 e008                          ldi r16, HIGH(RAMEND)
+000008 bf0e                          out SPH, r16
+                                 
+000009 e00f                          ldi r16, (1 << ISC00) | (1 << ISC01) | (1 << ISC10) | (1 << ISC11)
+00000a 9300 0069                     sts EICRA, r16      
+00000c e003                      	ldi r16, $03		; Enable interrupt request at INTO & INT1   
+00000d bb0d                          out EIMSK, r16
+                                 
+00000e ef0f                          ldi r16, $ff      ; load r16 with all 1s.
+00000f b904                          out DDRB, r16     ; set portB = output
+                                 	
+000010 e003                      	ldi r16, $03		; Set pin 0 & pin 1 to output, everyother
+ pin is an input
+000011 b90a                      	out DDRD, r16
+                                 
+000012 9a0e                      	sbi DDRA, 6			;Set Pin 6 on PORTA (Buzzer)
+                                 
+000013 9a0f                      	sbi DDRA, 7			; Set pin 7 on PORTA to output (OUTPUT)
+                                 
+000014 9a2c                          sbi portB, 4      ; set /SS of DOG LCD = 1 (Deselected)
+                                 	
+000015 d27e                          rcall init_lcd_dog        ; init display, using SPI serial
+ interface    
+000016 d09d                      	rcall clr_dsp_buffs       ; clear all three buffer lines
+000017 d29a                      	rcall update_lcd_dog      ; update the display
+                                 
+000018 e0d1                      	ldi YH, high (dsp_buff_1) ; Load YH and YL as a pointer to 1st
+000019 e1c3                          ldi YL, low (dsp_buff_1)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 
+                                 	;put FSM in initial state
+00001a e487                          ldi pstatel, LOW(begin)
+00001b e090                          ldi pstateh, HIGH(begin)
+                                 
+00001c 9478                      	sei                 ;set global interrupt enable
+                                 
+                                 variable_reset:
+                                 	; RESET THE VARIABLES WITH ZERO
+00001d e010                      	ldi r17, $00
+00001e 9310 0102                 	sts burst_count_setting_bcd + 2, r17	
+000020 9310 0101                 	sts burst_count_setting_bcd + 1, r17	
+000022 9310 0100                 	sts burst_count_setting_bcd + 0, r17	
+                                 	
+000024 9310 0110                 	sts make_pulse, r17
+000026 9310 0111                 	sts is_burst_zero, r17
+                                 			
+000028 9310 0103                 	sts burst_count, r17	
+                                 	
+00002a 9310 010f                 	sts keyvalue, r17		
+                                 	
+00002c e00a                      	ldi r16, 10
+00002d 9300 0107                 	sts pulse_width, r16
+00002f 9300 010b                 	sts pulse_delay, r16			  
+                                 	
+000031 e203                      	ldi r16, '#'
+000032 e210                      	ldi r17, ' '
+000033 9300 010c                 	sts line, r16
+000035 9310 010d                 	sts line + 1, r17
+000037 9310 010e                 	sts line + 2, r17	
+                                 
+                                 
+                                 test:
+000039 9100 0110                     lds r16, make_pulse
+00003b ff00                      	sbrs r16, 0				; Skip the rjmp instruction if the 
+make_pulse flag is set
+00003c cffc                          rjmp test
+                                 
+00003d 9100 0111                 	lds r16, is_burst_zero
+00003f 3001                      	cpi r16, 1
+000040 f419                      	brne gen_1_pulse
+                                 
+000041 940e 01d7                 	call generate_a_pulse
+000043 cff5                      	rjmp test
+                                 
+                                 gen_1_pulse:
+000044 940e 01ca                 	call pulse_generator
+000046 cff2                      	rjmp test
+                                 	
+                                 
+                                 
+                                 ;***************************************************************************
+                                 ;* 
+                                 ;* "fsm" - Simplified Table Driven Finite State Machine
+                                 ;*
+                                 ;* Description:
+                                 ;* This table driven FSM can handle 255 or fewer input symbols.
+                                 ;*
+                                 ;* Author:              Ken Short
+                                 ;* Version:             2.0
+                                 ;* Last updated:        11/09/15
+                                 ;* Target:              ATmega16
+                                 ;* Number of words:
+                                 ;* Number of cycles:
+                                 ;* Low regs modified:   r16, r18, r20, r21, r31, and r31
+                                 ;* High registers used:
+                                 ;*
+                                 ;* Parameters:          present state in r25:r24 prior to call
+                                 ;*                      input symbol in r16 prior to call
+                                 ;*
+                                 ;* Notes: 
+                                 ;*
+                                 ;***************************************************************************
+                                 
+                                 .def pstatel = r24 ;low byte of present state address
+                                 .def pstateh = r25 ;high byte of present state address
+                                 
+                                 ;input symbols for example finite state machine
+                                 .equ number = $00   ;input symbols equated to numerical values ;
+                                 .equ enter = $01
+                                 .equ clear = $02
+                                 .equ pushb = $03
+                                 .equ up_arrow = $04
+                                 .equ down_arrow = $05
+                                 
+                                                 ;additional symbols would go here
+                                 .equ eol = $FF  ;end of list (subtable) do not change
+                                 
+                                 ;state table for example finite state machine
+                                 ;each row consists of input symbol, next state address, task
+                                 ;subroutine address
+                                 
+                                 state_table:
+                                 
+000047 0000
+000048 0059
+000049 00bc                      begin:	 .dw number,		line1,		update_all
+00004a 0004
+00004b 0059
+00004c 00bc                      		 .dw up_arrow,		line1,		update_all
+00004d 0005
+00004e 0059
+00004f 00bc                      		 .dw down_arrow,	line1,		update_all
+000050 0001
+000051 0059
+000052 00bc                      		 .dw enter,			line1,		update_all
+000053 0002
+000054 0059
+000055 00bc                      		 .dw clear,			line1,		update_all
+000056 00ff
+000057 0059
+000058 00bc                      		 .dw eol,			line1,		update_all
+                                 
+000059 0000
+00005a 0059
+00005b 00c3                      line1:	 .dw number,		line1,		update_line_1
+00005c 0004
+00005d 007d
+00005e 015b                      		 .dw up_arrow,		line3,		switch_up_and_display
+00005f 0005
+000060 006b
+000061 0156                      		 .dw down_arrow,	line2,		switch_down_and_display
+000062 0001
+000063 008f
+000064 0193                      		 .dw enter,			idle,		convert	
+000065 0002
+000066 0059
+000067 018d                      		 .dw clear,			line1,		buzz
+000068 00ff
+000069 0059
+00006a 018d                      		 .dw eol,			line1,		buzz
+                                 
+00006b 0000
+00006c 006b
+00006d 00c8                      line2:	 .dw number,		line2,		update_line_2
+00006e 0004
+00006f 0059
+000070 015b                      		 .dw up_arrow,		line1,		switch_up_and_display
+000071 0005
+000072 007d
+000073 0156                      		 .dw down_arrow,	line3,		switch_down_and_display
+000074 0002
+000075 006b
+000076 018d                      		 .dw clear,			line2,		buzz
+000077 0001
+000078 008f
+000079 0193                      		 .dw enter,			idle,		convert	
+00007a 00ff
+00007b 006b
+00007c 018d                      		 .dw eol,			line2,		buzz
+                                 
+00007d 0000
+00007e 007d
+00007f 00cd                      line3:	 .dw number,		line3,		update_line_3
+000080 0004
+000081 006b
+000082 015b                      		 .dw up_arrow,		line2,		switch_up_and_display
+000083 0005
+000084 0059
+000085 0156                      		 .dw down_arrow,	line1,		switch_down_and_display
+000086 0002
+000087 007d
+000088 018d                      		 .dw clear,			line3,		buzz
+000089 0001
+00008a 008f
+00008b 0193                      		 .dw enter,			idle,		convert	
+00008c 00ff
+00008d 007d
+00008e 018d                      		 .dw eol,			line3,		buzz
+                                 
+00008f 0003
+000090 0095
+000091 01dc                      idle:	.dw pushb,			burst,		update_flags
+000092 00ff
+000093 008f
+000094 018d                      		.dw eol,			idle,		buzz
+                                 		
+000095 0003
+000096 0095
+000097 01dc                      burst:	.dw pushb,			burst,		update_flags
+000098 0002
+000099 0059
+00009a 01eb                      		.dw clear,			line1,		clear_flags
+00009b 00ff
+00009c 0095
+00009d 018d                      		.dw eol,			burst,		buzz		
+                                 
+                                 
+                                 fsm:
+                                 ;load Z with a byte pointer to the subtable corresponding to the
+                                 ;present state
+00009e 9100 0112                 	lds r16, input
+0000a0 2fe8                          mov ZL, pstatel ;load Z pointer with pstate address * 2
+0000a1 0fee                          add ZL, ZL ;since Z will be used as a byte pointer with the lpm instr.
+0000a2 2ff9                          mov ZH, pstateh
+0000a3 1fff                          adc ZH, ZH
+                                 
+                                 ;search subtable rows for input symbol match
+                                 search:
+0000a4 9124                          lpm r18, Z ;get symbol from state table
+0000a5 1720                          cp r18, r16 ;compare table entry with input symbol
+0000a6 f021                          breq match
+                                 
+                                 ;check input symbol against eol
+                                 check_eol:
+0000a7 3f2f                          cpi r18, eol ;compare low byte of table entry with eol
+0000a8 f011                          breq match
+                                 
+                                 nomatch:
+0000a9 9636                          adiw ZL, $06 ;adjust Z to point to next row of state table
+0000aa cff9                          rjmp search ;continue searching
+                                 
+                                 ;a match on input value to row input value has been found
+                                 ;the next word in this row is the next state address
+                                 ;the word following that is the task subroutine's address
+                                 match:
+                                 	;make preseent state equal to next state value in row
+                                 	;this accomplishes the stat transition
+0000ab 9632                          adiw ZL, $02 ;point to low byte of state address
+0000ac 9185                          lpm pstatel, Z+; ;copy next state addr. from table to preseent stat
+0000ad 9195                          lpm pstateh, Z+
+                                 
+                                 	;execute the subroutine that accomplihes the task associated
+                                 	;with the transition
+0000ae 9145                          lpm r20, Z+ ;get subroutine address from state table
+0000af 9154                          lpm r21, Z ;and put it in Z pointer
+0000b0 2fe4                          mov ZL, r20
+0000b1 2ff5                          mov ZH, r21
+0000b2 9509                          icall ;Z pointer is now used as a word pointer
+0000b3 9508                          ret
+                                 
+                                 
+                                 ;************************
+                                 ;NAME:      clr_dsp_buffs
+                                 ;FUNCTION:  Initializes dsp_buffers 1, 2, and 3 with blanks (0x20)
+                                 ;ASSUMES:   Three CONTIGUOUS 16-byte dram based buffers named
+                                 ;           dsp_buff_1, dsp_buff_2, dsp_buff_3.
+                                 ;RETURNS:   nothing.
+                                 ;MODIFIES:  r25,r26, Z-ptr
+                                 ;CALLS:     none
+                                 ;CALLED BY: main application and diagnostics
+                                 ;********************************************************************
+                                 clr_dsp_buffs:
+0000b4 e390                           ldi R25, 48			; load total length of both buffer.
+0000b5 e2a0                           ldi R26, ' '              ; load blank/space into R26.
+0000b6 e0f1                           ldi ZH, high (dsp_buff_1) ; Load ZH and ZL as a pointer to 1st
+0000b7 e1e3                           ldi ZL, low (dsp_buff_1)  ; byte of buffer for line 1.
+                                    
+                                     ;set DDRAM address to 1st position of first line.
+                                 store_bytes:
+0000b8 93a1                           st  Z+, R26       ; store ' ' into 1st/next buffer byte and
+                                                        ; auto inc ptr to next location.
+0000b9 959a                           dec  R25          ; 
+0000ba f7e9                           brne store_bytes  ; cont until r25=0, all bytes written.
+0000bb 9508                           ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR UPDATE ALL
+                                 ;**********************************************
+                                 update_all:
+0000bc 940e 00d2                 	call display_line_1
+0000be 940e 00f1                 	call display_line_2
+0000c0 940e 0110                 	call display_line_3
+0000c2 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR UPDATING (LINE 1)
+                                 ;**********************************************
+                                 update_line_1:
+0000c3 940e 012f                 	call store_value_line_1
+0000c5 940e 00d2                 	call display_line_1
+0000c7 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR UPDATING (LINE 2)
+                                 ;**********************************************
+                                 update_line_2:
+0000c8 940e 013c                 	call store_value_line_2
+0000ca 940e 00f1                 	call display_line_2
+0000cc 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR UPDATING (LINE 3)
+                                 ;**********************************************
+                                 update_line_3:
+0000cd 940e 0149                 	call store_value_line_3
+0000cf 940e 0110                 	call display_line_3
+0000d1 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR DISPLAYING THE INPUT TO LCD (LINE 1)
+                                 ;**********************************************
+                                 display_line_1:
+0000d2 e0d1                      	ldi YH, high (dsp_buff_1) ; Load YH and YL as a pointer to 1st
+0000d3 e1c3                          ldi YL, low (dsp_buff_1)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 	
+0000d4 e60e                      	ldi r16, 'n'
+0000d5 9309                      	st Y+, r16
+0000d6 e200                      	ldi r16, ' '
+0000d7 9309                      	st Y+, r16
+0000d8 e30d                      	ldi r16, '='
+0000d9 9309                      	st Y+, r16
+0000da e200                      	ldi r16, ' '
+0000db 9309                      	st Y+, r16
+                                 
+0000dc e310                      	ldi r17, $30							; Load $30 into r16
+                                 	; store the ascii representation of the digit in the buffer
+0000dd 9100 0102                 	lds r16, (burst_count_setting_bcd + 2)			
+; Store the leftmost keyvalue into r16
+                                 	
+0000df 2b01                      	or r16, r17								
+; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+0000e0 9309                      	st Y+, r16										
+; Put the value into the display buffer
+                                 	
+0000e1 9100 0101                 	lds r16, (burst_count_setting_bcd + 1)			; 
+0000e3 2b01                      	or r16, r17								
+; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+0000e4 9309                      	st Y+, r16
+                                 
+0000e5 9100 0100                 	lds r16, (burst_count_setting_bcd + 0)			
+; Store the rightmost keyvalue into r16
+0000e7 2b01                      	or r16, r17								
+; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+0000e8 9309                      	st Y+, r16										
+; Put the value into the display buffer	
+                                 
+0000e9 e200                      	ldi r16, ' '
+0000ea 9309                      	st Y+, r16
+                                 
+0000eb 9100 010c                 	lds r16, line + 0
+0000ed 9309                      	st Y+, r16
+                                 
+0000ee 940e 02b2                 	call update_lcd_dog								
+; update the display
+0000f0 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR DISPLAYING THE INPUT TO LCD (LINE 2)
+                                 ;**********************************************
+                                 display_line_2:
+0000f1 e0d1                      	ldi YH, high (dsp_buff_2) ; Load YH and YL as a pointer to 1st
+0000f2 e2c3                          ldi YL, low (dsp_buff_2)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 	
+0000f3 e704                      	ldi r16, 't'
+0000f4 9309                      	st Y+, r16
+0000f5 e200                      	ldi r16, ' '
+0000f6 9309                      	st Y+, r16
+0000f7 e30d                      	ldi r16, '='
+0000f8 9309                      	st Y+, r16
+0000f9 e200                      	ldi r16, ' '
+0000fa 9309                      	st Y+, r16
+                                 
+0000fb e310                      	ldi r17, $30							
+; Load $30 into r16
+                                 	; store the ascii representation of the 
+									digit in the buffer
+0000fc 9100 0106                 	lds r16, (pulse_width_bcd + 2)			
+; Store the leftmost keyvalue into r16
+                                 	
+0000fe 2b01                      	or r16, r17								
+; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+0000ff 9309                      	st Y+, r16										
+; Put the value into the display buffer
+                                 	
+000100 9100 0105                 	lds r16, (pulse_width_bcd + 1)			
+; 
+000102 2b01                      	or r16, r17								
+; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+000103 9309                      	st Y+, r16
+                                 
+000104 9100 0104                 	lds r16, (pulse_width_bcd + 0)			
+; Store the rightmost keyvalue into r16
+000106 2b01                      	or r16, r17								
+; Adds $30 to the keyvalue, which turn the keyvalue into ASCII
+000107 9309                      	st Y+, r16										
+                                 
+000108 e200                      	ldi r16, ' '
+000109 9309                      	st Y+, r16
+                                 
+00010a 9100 010d                 	lds r16, line + 1
+00010c 9309                      	st Y+, r16
+                                 
+00010d 940e 02b2                 	call update_lcd_dog								; update the display
+00010f 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR DISPLAYING THE INPUT TO LCD (LINE 3)
+                                 ;**********************************************
+                                 display_line_3:
+000110 e0d1                      	ldi YH, high (dsp_buff_3) ; Load YH and YL as a pointer to 1st
+000111 e3c3                          ldi YL, low (dsp_buff_3)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+                                 	
+000112 e604                      	ldi r16, 'd'
+000113 9309                      	st Y+, r16
+000114 e200                      	ldi r16, ' '
+000115 9309                      	st Y+, r16
+000116 e30d                      	ldi r16, '='
+000117 9309                      	st Y+, r16
+000118 e200                      	ldi r16, ' '
+000119 9309                      	st Y+, r16
+                                 
+00011a e310                      	ldi r17, $30							;
+                                 	; store the ascii representation of the digit in the buffer
+00011b 9100 010a                 	lds r16, (pulse_delay_bcd + 2)			; Store the leftmost keyvalue into r16
+                                 	
+00011d 2b01                      	or r16, r17								
+00011e 9309                      	st Y+, r16										
+                                 	
+00011f 9100 0109                 	lds r16, (pulse_delay_bcd + 1)			; 
+000121 2b01                      	or r16, r17								
+000122 9309                      	st Y+, r16
+                                 
+000123 9100 0108                 	lds r16, (pulse_delay_bcd + 0)			
+000125 2b01                      	or r16, r17								
+000126 9309                      	st Y+, r16										
+                                 
+000127 e200                      	ldi r16, ' '
+000128 9309                      	st Y+, r16
+                                 
+000129 9100 010e                 	lds r16, line + 2
+00012b 9309                      	st Y+, r16
+                                 
+00012c 940e 02b2                 	call update_lcd_dog								; update the display
+00012e 9508                      	ret
+                                 
+                                 
+                                 ;***********************************************
+                                 ;SUBROUTINE FOR STORING THE VALUE (LINE 1)
+                                 ;**********************************************
+                                 store_value_line_1:
+                                 	;r18 is the value read by the input
+00012f 9120 010f                 	lds r18, keyvalue
+000131 9100 0101                 	lds r16, burst_count_setting_bcd + 1	
+000133 9300 0102                 	sts burst_count_setting_bcd + 2, r16	
+                                 
+000135 9100 0100                 	lds r16, burst_count_setting_bcd + 0	
+000137 9300 0101                 	sts burst_count_setting_bcd + 1, r16	
+                                 
+000139 9320 0100                 	sts burst_count_setting_bcd + 0, r18	
+00013b 9508                      	ret
+                                 
+                                 
+                                 ;***********************************************
+                                 ;SUBROUTINE FOR STORING THE VALUE (LINE 2)
+                                 ;**********************************************
+                                 store_value_line_2:
+                                 	;r18 is the value read by the input
+00013c 9120 010f                 	lds r18, keyvalue
+00013e 9100 0105                 	lds r16, pulse_width_bcd + 1	
+000140 9300 0106                 	sts pulse_width_bcd + 2, r16	
+                                 
+000142 9100 0104                 	lds r16, pulse_width_bcd + 0	
+000144 9300 0105                 	sts pulse_width_bcd + 1, r16	
+                                 
+000146 9320 0104                 	sts pulse_width_bcd + 0, r18	
+000148 9508                      	ret
+                                 
+                                 
+                                 ;***********************************************
+                                 ;SUBROUTINE FOR STORING THE VALUE (LINE 3)
+                                 ;**********************************************
+                                 store_value_line_3:
+                                 	;r18 is the value read by the input
+000149 9120 010f                 	lds r18, keyvalue
+00014b 9100 0109                 	lds r16, pulse_delay_bcd + 1	; Load r16 with the middle digit
+00014d 9300 010a                 	sts pulse_delay_bcd + 2, r16	; Put the middle digit into the leftmost digit
+                                 
+00014f 9100 0108                 	lds r16, pulse_delay_bcd + 0	; Load r16 with the Rightmost digit
+000151 9300 0109                 	sts pulse_delay_bcd + 1, r16	; Put the rightmost digit into the middle digit
+                                 
+000153 9320 0108                 	sts pulse_delay_bcd + 0, r18	; Store the new number into the rightmost digit
+000155 9508                      	ret
+                                 
+                                 
+                                 ;**************************************
+                                 ;SUBROUTINE FOR WHEN THE # IS MOVED DOWN 
+                                 ;************************************
+                                 switch_down_and_display:
+000156 940e 0160                 	call switch_lines_down
+000158 940e 00bc                 	call update_all 
+00015a 9508                      	ret
+                                 
+                                 
+                                 ;**************************************
+                                 ;SUBROUTINE FOR WHEN THE # IS MOVED UP 
+                                 ;************************************
+                                 switch_up_and_display:
+00015b 940e 016d                 	call switch_lines_up
+00015d 940e 00bc                 	call update_all 
+00015f 9508                      	ret
+                                 
+                                 ;**************************************
+                                 ;SUBROUTINE FOR SWITCHING LINES DOWN
+                                 ;************************************
+                                 switch_lines_down:
+000160 9100 010c                 	lds r16, line
+000162 9110 010d                 	lds r17, line + 1
+000164 9120 010e                 	lds r18, line + 2
+                                 
+000166 9300 010d                 	sts line + 1, r16
+000168 9310 010e                 	sts line + 2, r17
+00016a 9320 010c                 	sts line, r18
+                                 
+00016c 9508                      	ret
+                                 
+                                 
+                                 ;***************************************
+                                 ;SUBROUTINE FOR SWITCHING LINES UP
+                                 ;***************************************
+                                 switch_lines_up:
+00016d 9100 010c                 	lds r16, line
+00016f 9110 010d                 	lds r17, line + 1
+000171 9120 010e                 	lds r18, line + 2
+                                 
+000173 9300 010e                 	sts line + 2, r16
+000175 9320 010d                 	sts line + 1, r18
+000177 9310 010c                 	sts line, r17
+                                 
+000179 9508                      	ret
+                                 
+                                 
+                                 ;**********************************
+                                 ;SUBROUTINE FOR RETRIEVING INPUT(PART 2)
+                                 ;*********************************
+                                 get_key_value:
+00017a b129                      	in r18, PIND			; Store the Input into r18
+00017b 7f20                      	andi r18, $F0			; Clear the low nibble of r18
+00017c 9522                      	swap r18				; Swap the nibble
+00017d 940e 0180                 	call keycode2keyvalue	; Convert the input into HEXVALUES (NOT ASCII)
+00017f 9508                      	ret
+                                 
+                                 
+                                 ;********************************
+                                 ;SUBROUTINE FOR LOOKUP TABLE
+                                 ;******************************
+                                 keycode2keyvalue:
+                                 lookup:
+000180 e0f4                      	ldi ZH, high (keytable * 2)		;set Z to point to start of table 
+000181 eaee                      	ldi ZL, low (keytable * 2)
+000182 e000                      	ldi r16, $00					;add offset to Z pointer 
+000183 0fe2                      	add ZL, r18						;originally r18
+000184 0ff0                      	add ZH, r16
+000185 9124                      	lpm r18, Z	
+000186 9508                      	ret
+                                 
+                                 
+                                 ;**************************
+                                 ;SUBROUTINE FOR DELAY
+                                 ;************************
+                                 var_delay: ;delay for ATmega324 @ 1MHz = r16 * 0.1 ms
+                                 outer_loop:
+000187 e210                      	ldi r17, 32
+                                 inner_loop:
+000188 951a                      	dec r17
+000189 f7f1                      	brne inner_loop
+00018a 950a                      	dec r16
+00018b f7d9                      	brne outer_loop
+00018c 9508                      	ret
+                                 
+                                 
+                                 ;**********************************
+                                 ;SUBROUTINE FOR BUZZER
+                                 ;*********************************
+                                 buzz:
+00018d 9a16                      	sbi PORTA, 6
+00018e ef0f                      	ldi r16 , 255	; For delay
+00018f 940e 0187                 	call var_delay
+000191 9816                      	cbi PORTA, 6
+000192 9508                      	ret
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert all three unpacked_bcd to binary
+                                 ;****************************************************
+                                 convert:
+000193 940e 01a6                 	call convert_line1_to_Packed_BCD
+000195 940e 0207                 	call BCD2bin16
+000197 92e0 0103                 	sts burst_count, r14				; Store the value of r17 into burst_count_bin
+                                 	
+                                 
+000199 940e 01b2                 	call convert_line2_to_Packed_BCD
+00019b 940e 0207                 	call BCD2bin16
+00019d 92e0 0107                 	sts pulse_width, r14
+                                 	
+                                 	
+00019f 940e 01be                 	call convert_line3_to_Packed_BCD
+0001a1 940e 0207                 	call BCD2bin16
+0001a3 92e0 010b                 	sts pulse_delay, r14
+                                 
+0001a5 9508                      	ret
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert the line 1 to PACKED BCD
+                                 ;****************************************************
+                                 convert_line1_to_Packed_BCD:
+0001a6 9100 0100                 	lds r16, burst_count_setting_bcd		
+0001a8 9110 0101                 	lds r17, burst_count_setting_bcd + 1	
+0001aa 9120 0102                 	lds r18, burst_count_setting_bcd + 2	
+                                 
+0001ac 9512                      	swap r17												
+0001ad 2b01                      	or r16, r17								
+0001ae 702f                      	andi r18, $0F							
+0001af 2f12                      	mov r17, r18							
+0001b0 e020                      	ldi r18, $00							
+                                 											
+0001b1 9508                      	ret 
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert the line 2 to PACKED BCD
+                                 ;****************************************************
+                                 convert_line2_to_Packed_BCD:
+0001b2 9100 0104                 	lds r16, pulse_width_bcd				
+0001b4 9110 0105                 	lds r17, pulse_width_bcd + 1	
+0001b6 9120 0106                 	lds r18, pulse_width_bcd + 2	
+                                 
+0001b8 9512                      	swap r17														
+0001b9 2b01                      	or r16, r17								
+0001ba 702f                      	andi r18, $0F							
+0001bb 2f12                      	mov r17, r18							
+0001bc e020                      	ldi r18, $00							
+                                 											
+0001bd 9508                      	ret 
+                                 
+                                 
+                                 ;*****************************************************		
+                                 ;SUBROUTINE convert the line 3 to PACKED BCD
+                                 ;****************************************************
+                                 convert_line3_to_Packed_BCD:
+0001be 9100 0108                 	lds r16, pulse_delay_bcd				
+0001c0 9110 0109                 	lds r17, pulse_delay_bcd + 1	
+0001c2 9120 010a                 	lds r18, pulse_delay_bcd + 2	
+                                 
+0001c4 9512                      	swap r17								 								
+0001c5 2b01                      	or r16, r17								
+0001c6 702f                      	andi r18, $0F							
+0001c7 2f12                      	mov r17, r18							
+0001c8 e020                      	ldi r18, $00							
+                                 									
+0001c9 9508                      	ret 
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR PULSE GENERATOR 
+                                 ;**********************************************
+                                 pulse_generator:
+0001ca 9100 0107                 	lds r16, pulse_width					
+0001cc 9a17                      	sbi PORTA, 7							
+0001cd dfb9                      	rcall var_delay	
+0001ce 9817                      	cbi PORTA, 7							 
+0001cf 9100 010b                 	lds r16, pulse_delay				
+0001d1 dfb5                      	rcall var_delay	
+0001d2 953a                      	dec r19								
+0001d3 f7b1                      	brne pulse_generator	
+                                 	
+0001d4 940e 01eb                 	call clear_flags
+                                 
+0001d6 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR GENERATING A PULSES
+                                 ;**********************************************
+                                 generate_a_pulse:	
+0001d7 e00a                      	ldi r16, 10							; pulse width
+0001d8 9a17                      	sbi PORTA, 7						; set bit for pulse
+0001d9 dfad                      	rcall var_delay	
+0001da 9817                      	cbi PORTA, 7						; clear bit for pulse 
+0001db 9508                      	ret
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR ASSIGNING FLAGS
+                                 ;**********************************************
+                                 update_flags:
+0001dc e001                      	ldi r16, 1					; Set the make_pulse flag
+0001dd 9300 0110                 	sts make_pulse, r16
+                                 
+0001df 9100 0103                 	lds r16, burst_count
+0001e1 3000                      	cpi r16, $00
+0001e2 f021                      	breq burst_is_zero
+                                 
+0001e3 e000                      	ldi r16, 0
+0001e4 9300 0111                 	sts is_burst_zero, r16
+                                 
+                                 please_go_here:
+0001e6 9508                      	ret
+                                 
+                                 burst_is_zero:
+0001e7 e001                      	ldi r16, 1
+0001e8 9300 0111                 	sts is_burst_zero, r16
+0001ea cffb                      	rjmp please_go_here
+                                 
+                                 
+                                 ;**********************************************
+                                 ;SUBROUTINE FOR CLEARING FLAGS
+                                 ;**********************************************
+                                 clear_flags:
+0001eb e000                      	ldi r16, 0
+0001ec 9300 0110                 	sts make_pulse, r16					; Reset the make_pluse to zero
+                                 
+0001ee 9300 0102                 	sts burst_count_setting_bcd + 2, r16	
+0001f0 9300 0101                 	sts burst_count_setting_bcd + 1, r16	
+0001f2 9300 0100                 	sts burst_count_setting_bcd + 0, r16
+                                 
+0001f4 9508                      	ret
+                                 
+                                 
+                                 ;***************************************************************************
+                                 ;*
+                                 ;* "BCD2bin16" - BCD to 16-Bit Binary Conversion
+                                 ;*
+                                 ;* This subroutine converts a 5-digit packed BCD number represented by 
+                                 ;* 3 bytes (fBCD2:fBCD1:fBCD0) to a 16-bit number (tbinH:tbinL).
+                                 ;* MSD of the 5-digit number must be placed in the lowermost nibble of fBCD2.
+                                 ;* 
+                                 ;* Let "abcde" denote the 5-digit number. The conversion is done by
+                                 ;* computing the formula: 10(10(10(10a+b)+c)+d)+e.
+                                 ;* The subroutine "mul10a"/"mul10b" does the multiply-and-add operation 
+                                 ;* which is repeated four times during the computation.
+                                 ;*  
+                                 ;* Number of words	:30 
+                                 ;* Number of cycles	:108 
+                                 ;* Low registers used	:4 (copyL,copyH,mp10L/tbinL,mp10H/tbinH)
+                                 ;* High registers used  :4 (fBCD0,fBCD1,fBCD2,adder)	
+                                 ;*
+                                 ;***************************************************************************
+                                 
+                                 ;***** "mul10a"/"mul10b" Subroutine Register Variables
+                                 
+                                 .def	copyL	=r12		;temporary register
+                                 .def	copyH	=r13		;temporary register
+                                 .def	mp10L	=r14		;Low byte of number to be multiplied by 10
+                                 .def	mp10H	=r15		;High byte of number to be multiplied by 10
+                                 .def	adder	=r19		;value to add after multiplication	
+                                 
+                                 ;***** Code
+                                 
+                                 mul10a:	;***** multiplies "mp10H:mp10L" with 10 and adds "adder" high nibble 
+0001f5 9532                      	swap	adder
+                                 mul10b:	;***** multiplies "mp10H:mp10L" with 10 and adds "adder" low nibble 
+0001f6 2cce                      	mov	copyL,mp10L	;make copy
+0001f7 2cdf                      	mov	copyH,mp10H
+0001f8 0cee                      	lsl	mp10L		;multiply original by 2
+0001f9 1cff                      	rol	mp10H
+0001fa 0ccc                      	lsl	copyL		;multiply copy by 2
+0001fb 1cdd                      	rol	copyH		
+0001fc 0ccc                      	lsl	copyL		;multiply copy by 2 (4)
+0001fd 1cdd                      	rol	copyH		
+0001fe 0ccc                      	lsl	copyL		;multiply copy by 2 (8)
+0001ff 1cdd                      	rol	copyH		
+000200 0cec                      	add	mp10L,copyL	;add copy to original
+000201 1cfd                      	adc	mp10H,copyH	
+000202 703f                      	andi	adder,0x0f	;mask away upper nibble of adder
+000203 0ee3                      	add	mp10L,adder	;add lower nibble of adder
+000204 f408                      	brcc	m10_1		;if carry not cleared
+000205 94f3                      	inc	mp10H		;	inc high byte
+000206 9508                      m10_1:	ret	
+                                 
+                                 ;***** Main Routine Register Variables
+                                 
+                                 .def	tbinL	=r14		;Low byte of binary result (same as mp10L)
+                                 .def	tbinH	=r15		;High byte of binary result (same as mp10H)
+                                 .def	fBCD0	=r16		;BCD value digits 1 and 0
+                                 .def	fBCD1	=r17		;BCD value digits 2 and 3
+                                 .def	fBCD2	=r18		;BCD value digit 5
+                                 
+                                 ;***** Code
+                                 
+                                 BCD2bin16:
+000207 702f                      	andi	fBCD2,0x0f	;mask away upper nibble of fBCD2
+000208 24ff                      	clr	mp10H		
+000209 2ee2                      	mov	mp10L,fBCD2	;mp10H:mp10L = a
+00020a 2f31                      	mov	adder,fBCD1
+00020b dfe9                      	rcall	mul10a		;mp10H:mp10L = 10a+b
+00020c 2f31                      	mov	adder,fBCD1
+00020d dfe8                      	rcall	mul10b		;mp10H:mp10L = 10(10a+b)+c
+00020e 2f30                      	mov	adder,fBCD0		
+00020f dfe5                      	rcall	mul10a		;mp10H:mp10L = 10(10(10a+b)+c)+d
+000210 2f30                      	mov	adder,fBCD0
+000211 dfe4                      	rcall	mul10b		;mp10H:mp10L = 10(10(10(10a+b)+c)+d)+e
+000212 9508                      	ret
+                                 	
+                                 
+                                 ;***************************************************************************
+                                 ;* 
+                                 ;* "keypress_ISR" - Check Interrupts at INT0
+                                 ;*
+                                 ;* Description: Get the keyvalue if the key is pressed, the keyvalue 
+                                 ;* Author:                  Seyi Olajuyi & Bassel El Amine
+                                 ;* Version:
+                                 ;* Last updated:            11/21/19
+                                 ;* Target:                  ATmega324A
+                                 ;* Number of words:
+                                 ;* Number of cycles:        N/A
+                                 ;* Low registers modified:  none
+                                 ;* High registers modified: none
+                                 ;*
+                                 ;* Parameters:  
+                                 ;* Notes: 
+                                 ;*
+                                 ;***************************************************************************
+                                 
+                                     ;INT0 interrupt service routine
+                                 keypress_ISR:
+000213 932f                      	push r18
+000214 930f                          push r16            ;save r16	
+000215 b70f                      	in r16, SREG        ;save SREG
+000216 930f                          push r16
+                                 	
+000217 e001                      	ldi r16, (1 <<INTF0)
+000218 bb0c                      	out EIFR, r16
+                                 		
+000219 df60                      	rcall get_key_value
+00021a 302a                      	cpi r18, $0A	
+00021b f088                      	brlo skip_line_1
+                                 
+00021c f0b1                      	breq input_clear
+                                 
+00021d 302c                      	cpi r18, $0C
+00021e f0c1                      	breq input_enter
+                                 
+00021f 302f                      	cpi r18, $0F
+000220 f0d1                      	breq input_up
+                                 
+000221 302e                      	cpi r18, $0E
+000222 f0e1                      	breq input_down
+                                 
+000223 ef0f                      	ldi r16, eol
+000224 9300 0112                 	sts input, r16
+                                 
+                                 restore_values_1:
+000226 940e 009e                 	call fsm
+                                 
+000228 910f                          pop r16             ;restore SREG
+000229 bf0f                          out SREG,r16
+00022a 910f                      	pop r16             ;restore r16
+00022b 912f                      	pop r18				;restore r18
+                                 
+00022c 9518                          reti                ;return from interrupt
+                                 
+                                 skip_line_1:
+00022d 9320 010f                 	sts keyvalue, r18						; if key value is a number
+                                 
+00022f e000                      	ldi r16, number							; input is assign as a number
+000230 9300 0112                 	sts input, r16
+                                 
+                                 	;;;;;;;;rcall store_value
+000232 cff3                      	rjmp restore_values_1
+                                 	
+                                 input_clear:
+000233 e002                      	ldi r16, clear
+000234 9300 0112                 	sts input, r16
+000236 cfef                      	rjmp restore_values_1
+                                 
+                                 input_enter:
+000237 e001                      	ldi r16, enter
+000238 9300 0112                 	sts input, r16
+00023a cfeb                      	rjmp restore_values_1
+                                 
+                                 input_up:
+00023b e004                      	ldi r16, up_arrow
+00023c 9300 0112                 	sts input, r16
+00023e cfe7                      	rjmp restore_values_1
+                                 
+                                 input_down:
+00023f e005                      	ldi r16, down_arrow
+000240 9300 0112                 	sts input, r16
+000242 cfe3                      	rjmp restore_values_1
+                                 
+                                 
+                                 ;***************************************************************************
+                                 ;* 
+                                 ;* "pb_press_ISR" - Check Interrupts at INT1
+                                 ;*
+                                 ;* Description: Checks if the push button is pressed
+                                 ;*
+                                 ;* Author:                  Ken Short
+                                 ;* Version:
+                                 ;* Last updated:            11/21/19
+                                 ;* Target:                  ATmega324A
+                                 ;* Number of words:
+                                 ;* Number of cycles:        16
+                                 ;* Low registers modified:  none
+                                 ;* High registers modified: none
+                                 ;*
+                                 ;* Parameters:  Uses PORTB register to hold the count and drive LEDs
+                                 ;* connected to that port.
+                                 ;*
+                                 ;* Notes: 
+                                 ;*
+                                 ;***************************************************************************
+                                 
+                                     ;INT1 interrupt service routine
+                                 pb_press_ISR:
+000243 930f                      	push r16            ;save r16
+000244 b70f                      	in r16, SREG        ;save SREG
+000245 930f                          push r16
+                                 
+                                 wait_for_bounce_1:
+000246 994b                      	sbic PIND, 3
+000247 cffe                      	rjmp wait_for_bounce_1
+000248 e604                      	ldi r16, 100
+000249 df3d                      	rcall var_delay
+00024a 994b                      	sbic PIND, 3
+00024b cffa                      	rjmp wait_for_bounce_1
+                                 
+00024c e002                      	ldi r16, (1 <<INTF1)
+00024d bb0c                      	out EIFR, r16
+                                 
+00024e e003                      	ldi r16 , $03						; Set polling_for_button
+00024f 9300 0112                 	sts input, r16		; Use to find out if the button was pressed
+                                 
+                                 restore_value_2:
+000251 940e 009e                 	call fsm
+000253 910f                          pop r16             ;restore SREG
+000254 bf0f                          out SREG,r16
+000255 910f                      	pop r16             ;restore r16
+                                 
+000256 9518                          reti                ;return from interrupt
+                                 
+                                 
+                                 
+                                 
+000257 0201
+000258 0f03
+000259 0504
+00025a 0e06
+00025b 0807
+00025c 0d09                      keytable: .db $01, $02, $03, $0F, $04, $05, $06, $0E, $07, $08, $09, $0D
+00025d 000a
+00025e 0c0b                      		.db $0A, $00, $0B, $0C
+                                       
+                                 
+                                 .list
+                                 
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+"ATmega324A" register use summary:
+x  :   0 y  :  27 z  :  10 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   5 
+r13:   5 r14:   8 r15:   5 r16: 196 r17:  44 r18:  39 r19:   8 r20:  10 
+r21:   2 r22:   2 r23:   2 r24:   7 r25:   5 r26:   2 r27:   0 r28:   4 
+r29:   4 r30:  12 r31:  10 
+Registers used: 21 out of 35 (60.0%)
+
+"ATmega324A" instruction use summary:
+.lds  :   0 .sts  :   0 adc   :   2 add   :   5 adiw  :   2 and   :   0 
+andi  :   6 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   1 brcs  :   0 break :   0 breq  :   7 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   1 brlt  :   0 brmi  :   0 
+brne  :  11 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :  29 cbi   :   6 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   1 cpc   :   0 
+cpi   :   7 cpse  :   0 dec   :  10 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   1 ijmp  :   0 in    :  12 inc   :   1 jmp   :   0 
+ld    :   3 ldd   :   0 ldi   :  88 lds   :  42 lpm   :   9 lsl   :   4 
+lsr   :   0 mov   :  14 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   2 or    :  12 ori   :   0 out   :  12 pop   :  11 
+push  :  11 rcall :  47 ret   :  38 reti  :   2 rjmp  :  17 rol   :   4 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :  12 sbic  :   2 sbis  :   0 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   3 sec   :   0 seh   :   0 
+sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :  28 std   :   0 sts   :  46 
+sub   :   0 subi  :   0 swap  :   5 tst   :   0 wdr   :   0 
+Instructions used: 40 out of 113 (35.4%)
+
+"ATmega324A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x0005ae   1260    190   1450   32768   4.4%
+[.dseg] 0x000100 0x000143      0     67     67    2048   3.3%
+[.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
+
+Assembly complete, 0 errors, 2 warnings

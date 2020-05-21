@@ -1,0 +1,112 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.7</VERSION>
+ <DEVICE>"ATmega324A"</DEVICE>
+ <WORKING_DIR>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m324adef.inc</FILE>
+  <FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\Debug\ppg_IV_fsm.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>ppg_IV_fsm.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>ppg_IV_fsm.map</FILE>
+  <FILE>ppg_IV_fsm.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <burst_count_setting_bcd><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>28</LINE></burst_count_setting_bcd>
+  <burst_count><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>29</LINE></burst_count>
+  <keyvalue><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>30</LINE></keyvalue>
+  <make_pulse><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>31</LINE></make_pulse>
+  <is_burst_zero><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>32</LINE></is_burst_zero>
+  <input><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>33</LINE></input>
+  <reset><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>40</LINE></reset>
+  <start><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>48</LINE></start>
+  <keypress_ISR><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>513</LINE></keypress_ISR>
+  <pb_press_ISR><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>588</LINE></pb_press_ISR>
+  <init_lcd_dog><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>230</LINE></init_lcd_dog>
+  <clr_dsp_buffs><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>220</LINE></clr_dsp_buffs>
+  <update_lcd_dog><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>307</LINE></update_lcd_dog>
+  <dsp_buff_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>53</LINE></dsp_buff_1>
+  <display><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>158</LINE></display>
+  <variable_reset><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>85</LINE></variable_reset>
+  <test><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>100</LINE></test>
+  <gen_1_pulse><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>112</LINE></gen_1_pulse>
+  <generate_a_pulse><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>354</LINE></generate_a_pulse>
+  <pulse_generator><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>336</LINE></pulse_generator>
+  <state_table><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>156</LINE></state_table>
+  <display_the_value><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>238</LINE></display_the_value>
+  <burst><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>162</LINE></burst>
+  <convert_to_Binary><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>397</LINE></convert_to_Binary>
+  <buzz><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>325</LINE></buzz>
+  <update_flags><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>365</LINE></update_flags>
+  <clear_flags><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>388</LINE></clear_flags>
+  <fsm><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>167</LINE></fsm>
+  <search><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>176</LINE></search>
+  <match><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>193</LINE></match>
+  <check_eol><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>182</LINE></check_eol>
+  <nomatch><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>186</LINE></nomatch>
+  <store_bytes><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>227</LINE></store_bytes>
+  <store_value><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>273</LINE></store_value>
+  <get_key_value><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>288</LINE></get_key_value>
+  <keycode2keyvalue><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>298</LINE></keycode2keyvalue>
+  <lookup><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>299</LINE></lookup>
+  <keytable><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>618</LINE></keytable>
+  <var_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>311</LINE></var_delay>
+  <outer_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>312</LINE></outer_loop>
+  <inner_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>314</LINE></inner_loop>
+  <burst_is_zero><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>379</LINE></burst_is_zero>
+  <please_go_here><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>376</LINE></please_go_here>
+  <BCD2bin16><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>477</LINE></BCD2bin16>
+  <mul10a><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>446</LINE></mul10a>
+  <mul10b><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>448</LINE></mul10b>
+  <m10_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>465</LINE></m10_1>
+  <skip_line_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>544</LINE></skip_line_1>
+  <input_clear><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>553</LINE></input_clear>
+  <input_enter><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>558</LINE></input_enter>
+  <restore_values_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>534</LINE></restore_values_1>
+  <wait_for_bounce_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>593</LINE></wait_for_bounce_1>
+  <restore_value_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\main.asm</FILE><LINE>607</LINE></restore_value_2>
+  <dsp_buff_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>54</LINE></dsp_buff_2>
+  <dsp_buff_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>55</LINE></dsp_buff_3>
+  <delay_30uS><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>74</LINE></delay_30uS>
+  <d30_loop><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>78</LINE></d30_loop>
+  <v_delay><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>107</LINE></v_delay>
+  <delay_40mS><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>126</LINE></delay_40mS>
+  <init_spi_lcd><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>142</LINE></init_spi_lcd>
+  <lcd_spi_transmit_CMD><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>168</LINE></lcd_spi_transmit_CMD>
+  <wait_transmit><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>177</LINE></wait_transmit>
+  <lcd_spi_transmit_DATA><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>198</LINE></lcd_spi_transmit_DATA>
+  <wait_transmit1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>209</LINE></wait_transmit1>
+  <start_dly_40ms><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>234</LINE></start_dly_40ms>
+  <func_set1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>238</LINE></func_set1>
+  <func_set2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>244</LINE></func_set2>
+  <bias_set><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>250</LINE></bias_set>
+  <power_ctrl><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>256</LINE></power_ctrl>
+  <follower_ctrl><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>263</LINE></follower_ctrl>
+  <contrast_set><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>269</LINE></contrast_set>
+  <display_on><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>276</LINE></display_on>
+  <clr_display><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>282</LINE></clr_display>
+  <entry_mode><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>288</LINE></entry_mode>
+  <wr_line1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>314</LINE></wr_line1>
+  <snd_ddram_addr><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>317</LINE></snd_ddram_addr>
+  <snd_buff_1><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>321</LINE></snd_buff_1>
+  <init_for_buff_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>330</LINE></init_for_buff_2>
+  <wr_line2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>333</LINE></wr_line2>
+  <snd_ddram_addr2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>336</LINE></snd_ddram_addr2>
+  <snd_buff_2><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>340</LINE></snd_buff_2>
+  <init_for_buff_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>349</LINE></init_for_buff_3>
+  <wr_line3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>351</LINE></wr_line3>
+  <snd_ddram_addr3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>354</LINE></snd_ddram_addr3>
+  <snd_buff_3><FILE>C:\Users\Seyi Olajuyi\Documents\Atmel Studio\7.0\ppg_IV_fsm\ppg_IV_fsm\lcd_dog_asm_driver_m324a.inc</FILE><LINE>360</LINE></snd_buff_3>
+ </LABELS>
+</ASSEMBLER_INFO>
