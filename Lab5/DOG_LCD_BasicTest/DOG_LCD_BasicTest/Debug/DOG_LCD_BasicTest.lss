@@ -1,0 +1,619 @@
+
+AVRASM ver. 2.2.7  F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\main.asm Fri Oct 18 13:38:04 2019
+
+F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\main.asm(15): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\main.asm(34): Including file 'F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\lcd_dog_asm_driver_m324a.inc'
+F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\main.asm(15): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\main.asm(34): Including file 'F:\Lab5\DOG_LCD_BasicTest\DOG_LCD_BasicTest\lcd_dog_asm_driver_m324a.inc'
+                                 
+                                 
+                                 ;**********        BASIC DOG LCD TEST PROGRAM           **********
+                                 ;*****************************************************************
+                                 ;
+                                 ;DOG_LCD_BasicTest.asm
+                                 ;  Simple test application to verify DOG LCD is properly 
+                                 ;  wired.  This test writes simple test messages to each 
+                                 ;  line of the display.
+                                 ;
+                                 ;Version - 1.0a
+                                 ;
+                                 
+                                 
+                                 .list
+                                 
+                                 
+                                 
+                                      .CSEG
+                                 
+                                 
+                                      ; interrupt vector table, with several 'safety' stubs
+000000 c091                           rjmp RESET      ;Reset/Cold start vector
+000001 9518                           reti            ;External Intr0 vector
+000002 9518                           reti            ;External Intr1 vector
+                                 
+                                 
+                                 
+                                 ;---------------------------- SUBROUTINES ----------------------------
+                                 
+                                 
+                                 ;====================================
+                                 .include "lcd_dog_asm_driver_m324a.inc"  ; LCD DOG init/update procedures.
+                                 
+                                 ;   ATMega324A Version:                PRINT IN LANDSCAPE                     
+                                 ;   Revised 10/28/17
+                                 ;	
+                                 ;   This AVR-asm code module is usable as an include file for assembly
+                                 ;   language and or mixed asm/C application programs. The code is freely 
+                                 ;   usable by any University of Stonybrook undergraduate students for any
+                                 ;   and all not-for-profit system designs and or implementations.
+                                 ;
+                                 ;   This code is designed to be executed on an AVR ATMega324A.
+                                 ;   And may be readily adapted for compatibility with IAR/AVR compilers. 
+                                 ;   See the IAR assembler reference guide for more information by 
+                                 ;   clicking 'Help > AVR Assembly Reference Guide" on the above menus.
+                                 ;
+                                 ;	Note: Setting may need to be changed in init_lcd_dog subroutine
+                                 ;	depending on whether the LCD is operated at 3.3 V or 5.0 V, see
+                                 ;	comments in the subroutine.
+                                 ;
+                                 ;*********************************************************************
+                                 ;
+                                 ;   This module contains procedures to initialize and update
+                                 ;   DOG text based LCD display modules, including the EA DOG163M LCD
+                                 ;   modules configured with three (3) 16 charactors display lines.
+                                 ;
+                                 ;   The display module hardware interface uses a 1-direction, write only
+                                 ;   SPI interface. (See below for more information.)
+                                 ;
+                                 ;   The display module software interface uses three (3) 16-byte
+                                 ;   data (RAM) based display buffers - One for each line of the display.
+                                 ;   (See below for more information.)
+                                 
+                                 
+                                 ;
+                                 ;*********************************************************************
+                                 ;
+                                 ;   *** Port B Interface Definitions:
+                                 ;
+                                 ;  Port B             PB7   PB6   PB5   PB4   PB3   PB2   PB1   PB0
+                                 ;  Port B alt names   SCK   MISO  MOSI  /SS   /RS    -     -     -
+                                 ;  LCD Mod Signal     D6     -     D7   /CSB   -     -     -     -
+                                 ;  LCD Mod Pin #      29     -     28    38    -     -     -     -
+                                 ;
+                                 ;      Notes:  RS ==>  0 = command regs, 1 = data regs
+                                 ;             /SS = active low SPI select signal
+                                 ;
+                                 ;******************
+                                 
+                                 
+                                 
+                                 
+                                 ;***  DATA Segment  **************************************************   
+                                 .dseg
+000100                           dsp_buff_1:   .byte 16		;16 byte array for display line 1
+000110                           dsp_buff_2:   .byte 16		;16 byte array for display line 2
+000120                           dsp_buff_3:   .byte 16		;16 byte array for display line 3
+                                 
+                                 
+                                 
+                                 
+                                 ;***  CODE Segment Subroutines  ************************************
+                                 .cseg
+                                 
+                                 
+                                 
+                                 ;************************
+                                 ;NAME:        delay_30uS
+                                 ;ASSUMES:     nothing
+                                 ;RETURNS:     nothing
+                                 ;MODIFIES:    R24, SREG
+                                 ;CALLED BY:   init_dsp
+                                 ;DESCRIPTION: This procedure will generate a fixed delay of just over
+                                 ;             30 uS (assuming a 1 MHz clock).
+                                 ;********************************************************************
+000003 0000                      delay_30uS:   nop     ; fine tune delay
+000004 0000                                    nop
+000005 938f                                    push  r24
+000006 e08f                                    ldi   r24, 0x0f  ; load delay count.
+000007 958a                      d30_loop:     dec   r24        ; count down to
+000008 f7f1                                    brne  d30_loop   ; zero.
+000009 918f                                    pop   r24
+00000a 9508                                    ret
+                                 
+                                 
+                                 
+                                 ;*********************
+                                 ;NAME:        v_delay
+                                 ;ASSUMES:     R22, R23 = initial count values defining how many
+                                 ;             30uS delays will be called. This procedure can generate
+                                 ;             short delays (r23 = small #) or much longer delays (where
+                                 ;             R23 value is large).
+                                 ;RETURNS:     nothing
+                                 ;MODIFIES:    R22, R23, SREG
+                                 ;CALLED BY:   init_dsp, plus...
+                                 ;DESCRIPTION: This procedure will generate a variable delay for a fixed
+                                 ;             period of time based the values pasted in R24 and R25.
+                                 ;
+                                 ;Sample Delays:
+                                 ;
+                                 ;             R22  R23  DelayTime
+                                 ;             ---  ---  ---------
+                                 ;              1    1   ~65.5 uS
+                                 ;              0    1   ~14.2 mS
+                                 ;              0    9   ~130 mS
+                                 
+                                 
+                                 ;**********************************************************************
+00000b dff7                      v_delay:      rcall delay_30uS ; delay for ~30uS
+00000c 956a                                    dec   r22      ; decrement inner loop value, and
+00000d f7e9                                    brne  v_delay  ; loop until zero.
+00000e 957a                                    dec   r23      ; decr outer loop count, and loop back
+00000f f7d9                                    brne  v_delay  ; to inner loop delay until r23 zero.
+000010 9508                                    ret
+                                 
+                                 
+                                 
+                                 
+                                 ;***********************
+                                 ;NAME:        delay_40mS
+                                 ;ASSUMES:     nothing
+                                 ;RETURNS:     nothing
+                                 ;MODIFIES:    R22,R23, SREG
+                                 ;CALLED BY:   init_dsp, ????
+                                 ;DESCRIPTION: This procedure will generate a fixed delay of just over
+                                 ;             40 mS.
+                                 ;********************************************************************
+000011 e060                      delay_40mS:   ldi   r22,0        ; load inner loop var
+000012 e074                                    ldi   r23,4        ; load outer loop var
+000013 dff7                                    rcall  v_delay     ; delay
+000014 9508                                    ret
+                                 
+                                 
+                                 
+                                 
+                                 ;************************
+                                 ;NAME:       init_spi_lcd
+                                 ;ASSUMES:    MOSI, SCK, and /SS set as output (during program init)
+                                 ;RETURNS:    nothing
+                                 ;MODIFIES:   DDRB, SPCR
+                                 ;CALLED BY:  init_dsp, update
+                                 ;DESCRITION: init SPI port for command and data writes to LCD via SPI
+                                 ;********************************************************************
+                                 init_spi_lcd:
+000015 930f                            push r16
+000016 9a25                      	  sbi DDRB, 5		;set MOSI as output
+000017 9a27                      	  sbi DDRB,	7		;set SCK as output
+000018 9a24                      	  sbi DDRB,	4		;set /SS as output 
+000019 e50c                            ldi r16,(1<<SPE0) | (1<<MSTR0) | (1<<CPOL0) | (1<<CPHA0)
+00001a bd0c                            out SPCR0,r16   ; Enable SPI, Master, fclk/4, 
+                                       
+                                       ;kill any spurious data...
+00001b b50d                            in r16, SPSR0   ; clear SPIF bit in SPSR
+00001c b50e                            in r16, SPDR0   ;
+00001d 910f                            pop r16        ; restore r16 value...
+00001e 9508                            ret
+                                 
+                                 
+                                 
+                                 ;********************************
+                                 ;NAME:       lcd_spi_transmit_CMD
+                                 ;ASSUMES:    r16 = byte for LCD.
+                                 ;            SPI port is configured.
+                                 ;RETURNS:    nothing
+                                 ;MODIFIES:   R16, PortB, SPCR
+                                 ;CALLED BY:  init_dsp, update
+                                 ;DESCRITION: outputs a byte passed in r16 via SPI port. Waits for data
+                                 ;            to be written by spi port before continuing.
+                                 ;*********************************************************************
+                                 lcd_spi_transmit_CMD:
+00001f 930f                           push r16          ; save command, need r16.
+000020 982b                           cbi   portB, 3    ; clr PB1 = RS = 0 = command.
+000021 982c                           cbi   portB, 4    ; clr PB2 = /SS = selected.
+000022 910f                           pop r16           ; restore command
+000023 bd0e                           out SPDR0,r16      ; write data to SPI port.
+                                 
+                                 
+                                      ;Wait for transmission complete
+                                 wait_transmit:
+000024 b50d                           in r16, SPSR0    ; read status reg
+000025 ff07                           sbrs r16, SPIF0   ; if bit 7  = 0 wait
+000026 cffd                           rjmp wait_transmit
+000027 b50e                      	 in r16, SPDR0		;clear SPIF0 (kls102817)
+000028 9a2c                           sbi   portB, 4   ; set PB2 = /SS = deselected
+000029 9508                           ret
+                                 
+                                 
+                                 
+                                 
+                                 ;*********************************
+                                 ;NAME:       lcd_spi_transmit_DATA
+                                 ;ASSUMES:    r16 = byte to transmit to LCD.
+                                 ;            SPI port is configured.
+                                 ;RETURNS:    nothing
+                                 ;MODIFIES:   R16, SPCR
+                                 ;CALLED BY:  init_dsp, update
+                                 ;DESCRITION: outputs a byte passed in r16 via SPI port. Waits for
+                                 ;            data to be written by spi port before continuing.
+                                 ;*****************************************************************
+                                 lcd_spi_transmit_DATA:
+00002a 930f                           push r16          ; save command, need r16.
+00002b 9a2b                           sbi   portB, 3    ; clr PB1 = RS = 1 = data.
+00002c 982c                           cbi   portB, 4    ; clr PB2 = /SS = selected.
+00002d b50d                              in r16, SPSR0   ; clear SPIF bit in SPSR.
+00002e b50e                              in r16, SPDR0   ;
+00002f 910f                           pop r16           ; restore command.
+000030 bd0e                           out SPDR0,r16      ; write data to SPI port.
+                                 
+                                 
+                                      ;Wait for transmission complete
+                                 wait_transmit1:
+000031 b50d                           in r16, SPSR0     ; read status reg
+000032 b51e                           in r17, SPDR0     ; and clear SPIF
+000033 ff07                           sbrs r16, SPIF0   ; if bit 7  = 0 wait
+000034 cffc                           rjmp wait_transmit1
+000035 b50e                       	 in r16, SPDR0		;clear SPIF0 (kls102817)
+000036 9a2c                           sbi   portB, 4   ; set PB2 = /SS = deselected
+000037 9508                           ret
+                                 
+                                 
+                                 
+                                 ;************************
+                                 ;NAME:       init_lcd_dog
+                                 ;ASSUMES:    nothing
+                                 ;RETURNS:    nothing
+                                 ;MODIFIES:   R16, R17
+                                 ;CALLED BY:  main application
+                                 ;DESCRITION: inits DOG module LCD display for SPI (serial) operation.
+                                 ;NOTE:  Can be used as is with MCU clock speeds of 4MHz or less.
+                                 ;********************************************************************
+                                 ; public __version_1 void init_dsp(void)
+                                 init_lcd_dog:
+000038 dfdc                             rcall init_spi_lcd   ; init SPI port for DOG LCD.
+                                 
+                                 
+                                 start_dly_40ms:
+000039 dfd7                             rcall  delay_40mS    ; startup delay.
+                                 
+                                 
+                                 func_set1:
+00003a e309                             ldi    r16,0x39      ; send fuction set #1
+00003b dfe3                             rcall  lcd_spi_transmit_CMD   ;
+00003c dfc6                             rcall  delay_30uS    ; delay for command to be processed
+                                 
+                                 
+                                 func_set2:
+00003d e309                             ldi    r16,0x39      ; send fuction set #2
+00003e dfe0                             rcall  lcd_spi_transmit_CMD
+00003f dfc3                             rcall  delay_30uS    ; delay for command to be processed
+                                 
+                                 
+                                 bias_set:
+000040 e10e                             ldi    r16,0x1E      ; set bias value.
+000041 dfdd                             rcall  lcd_spi_transmit_CMD
+000042 dfc0                             rcall  delay_30uS    ;
+                                 
+                                 
+                                 power_ctrl:
+000043 e500                             ldi    r16,0x50      ;~ 0x50 nominal for 5V
+                                 							;~ 0x55 for 3.3V (delicate adjustment). 
+000044 dfda                             rcall  lcd_spi_transmit_CMD
+000045 dfbd                             rcall  delay_30uS    ;
+                                 
+                                 
+                                 follower_ctrl:
+000046 e60c                             ldi    r16,0x6C      ; follower mode on... 
+000047 dfd7                             rcall  lcd_spi_transmit_CMD
+000048 dfc8                             rcall  delay_40mS    ;
+                                 
+                                 
+                                 contrast_set:
+000049 e707                             ldi    r16,0x77      ;~ 77 for 5V
+                                 							;~ 7F for 3.3V  
+00004a dfd4                             rcall  lcd_spi_transmit_CMD
+00004b dfb7                             rcall  delay_30uS    ; 
+                                 
+                                 
+                                 display_on:
+00004c e00c                             ldi    r16,0x0c      ; display on, cursor off, blink off
+00004d dfd1                             rcall  lcd_spi_transmit_CMD
+00004e dfb4                             rcall  delay_30uS    ; 
+                                 
+                                 
+                                 clr_display:
+00004f e001                             ldi    r16,0x01      ; clear display, cursor home
+000050 dfce                             rcall  lcd_spi_transmit_CMD
+000051 dfb1                             rcall  delay_30uS    ;
+                                 
+                                 
+                                 entry_mode:
+000052 e006                             ldi    r16,0x06      ; clear display, cursor home
+000053 dfcb                             rcall  lcd_spi_transmit_CMD;
+000054 dfae                             rcall  delay_30uS    ;
+000055 9508                             ret
+                                 
+                                 
+                                 
+                                 
+                                 ;**************************
+                                 ;NAME:       update_lcd_dog
+                                 ;ASSUMES:    display buffers loaded with display data
+                                 ;RETURNS:    nothing
+                                 ;MODIFIES:   R16,R20,R30,R31,SREG
+                                 ;
+                                 ;DESCRITION: Updates the LCD display lines 1, 2, and 3, using the
+                                 ;  contents of dsp_buff_1, dsp_buff_2, and dsp_buff_3, respectively.
+                                 ;*******************************************************************
+                                 ; public __version_1 void update_dsp_dog (void)
+                                 update_lcd_dog:
+000056 dfbe                             rcall init_spi_lcd    ; init SPI port for LCD.
+000057 e140                             ldi   r20,16          ; init 'chars per line' counter.
+000058 934f                             push  r20             ; save for later used.
+                                 
+                                 
+                                        ;send line 1 to the LCD module.
+                                 wr_line1:     
+000059 e0f1                             ldi   ZH, high (dsp_buff_1)  ; init ptr to line 1 display buffer.
+00005a e0e0                             ldi   ZL, low (dsp_buff_1)   ;
+                                 snd_ddram_addr:
+00005b e800                             ldi   r16,0x80             ; init DDRAM addr-ctr 
+00005c dfc2                             rcall lcd_spi_transmit_CMD ; 
+00005d dfa5                             rcall delay_30uS
+                                 snd_buff_1:
+00005e 9101                             ld    r16, Z+
+00005f dfca                             rcall lcd_spi_transmit_DATA
+000060 dfa2                             rcall delay_30uS
+000061 954a                             dec   r20
+000062 f7d9                             brne  snd_buff_1
+                                 
+                                 
+                                        ;send line 2 to the LCD module.
+                                 init_for_buff_2:
+000063 914f                             pop   r20     ; reload r20 = chars per line counter
+000064 934f                             push  r20     ; save for line 3
+                                 wr_line2:
+000065 e0f1                             ldi   ZH, high (dsp_buff_2)  ; init ptr to line 2 display buffer.
+000066 e1e0                             ldi   ZL, low (dsp_buff_2)
+                                 snd_ddram_addr2:
+000067 e900                             ldi   r16,0x90               ; init DDRAM addr-ctr 
+000068 dfb6                             rcall lcd_spi_transmit_CMD           ;  
+000069 df99                             rcall delay_30uS
+                                 snd_buff_2:
+00006a 9101                             ld    r16, Z+
+00006b dfbe                             rcall lcd_spi_transmit_DATA
+00006c df96                             rcall delay_30uS
+00006d 954a                             dec   r20
+00006e f7d9                             brne  snd_buff_2
+                                 
+                                 
+                                        ;send line 3 to the LCD module.
+                                 init_for_buff_3:
+00006f 914f                             pop   r20     ; reload r20 = chars per line counter
+                                 wr_line3:
+000070 e0f1                             ldi   ZH, high (dsp_buff_3)  ; init ptr to line 2 display buffer.
+000071 e2e0                             ldi   ZL, low (dsp_buff_3)
+                                 snd_ddram_addr3:
+000072 ea00                             ldi   r16,0xA0               ; init DDRAM addr-ctr 
+000073 dfab                             rcall lcd_spi_transmit_CMD           ;  
+000074 df8e                             rcall delay_30uS
+                                 
+                                 
+                                 snd_buff_3:
+000075 9101                             ld    r16, Z+
+000076 dfb3                             rcall lcd_spi_transmit_DATA
+000077 df8b                             rcall delay_30uS
+000078 954a                             dec   r20
+000079 f7d9                             brne  snd_buff_3
+00007a 9508                             ret
+                                 
+                                 
+                                 ;******* End Of Include Module *********************************
+                                 ;====================================
+                                 
+                                 
+                                 ;************************
+                                 ;NAME:      clr_dsp_buffs
+                                 ;FUNCTION:  Initializes dsp_buffers 1, 2, and 3 with blanks (0x20)
+                                 ;ASSUMES:   Three CONTIGUOUS 16-byte dram based buffers named
+                                 ;           dsp_buff_1, dsp_buff_2, dsp_buff_3.
+                                 ;RETURNS:   nothing.
+                                 ;MODIFIES:  r25,r26, Z-ptr
+                                 ;CALLS:     none
+                                 ;CALLED BY: main application and diagnostics
+                                 ;********************************************************************
+                                 clr_dsp_buffs:
+00007b e390                           ldi R25, 48               ; load total length of both buffer.
+00007c e2a0                           ldi R26, ' '              ; load blank/space into R26.
+00007d e0f1                           ldi ZH, high (dsp_buff_1) ; Load ZH and ZL as a pointer to 1st
+00007e e0e0                           ldi ZL, low (dsp_buff_1)  ; byte of buffer for line 1.
+                                    
+                                     ;set DDRAM address to 1st position of first line.
+                                 store_bytes:
+00007f 93a1                           st  Z+, R26       ; store ' ' into 1st/next buffer byte and
+                                                        ; auto inc ptr to next location.
+000080 959a                           dec  R25          ; 
+000081 f7e9                           brne store_bytes  ; cont until r25=0, all bytes written.
+000082 9508                           ret
+                                 
+                                 
+                                 
+                                 ;*******************
+                                 ;NAME:      load_msg
+                                 ;FUNCTION:  Loads a predefined string msg into a specified diplay
+                                 ;           buffer.
+                                 ;ASSUMES:   Z = offset of message to be loaded. Msg format is 
+                                 ;           defined below.
+                                 ;RETURNS:   nothing.
+                                 ;MODIFIES:  r16, Y, Z
+                                 ;CALLS:     nothing
+                                 ;CALLED BY:  
+                                 ;********************************************************************
+                                 ; Message structure:
+                                 ;   label:  .db <buff num>, <text string/message>, <end of string>
+                                 ;
+                                 ; Message examples (also see Messages at the end of this file/module):
+                                 ;   msg_1: .db 1,"First Message ", 0   ; loads msg into buff 1, eom=0
+                                 ;   msg_2: .db 1,"Another message ", 0 ; loads msg into buff 1, eom=0
+                                 ;
+                                 ; Notes: 
+                                 ;   a) The 1st number indicates which buffer to load (either 1, 2, or 3).
+                                 ;   b) The last number (zero) is an 'end of string' indicator.
+                                 ;   c) Y = ptr to disp_buffer
+                                 ;      Z = ptr to message (passed to subroutine)
+                                 ;********************************************************************
+                                 load_msg:
+000083 e0d1                           ldi YH, high (dsp_buff_1) ; Load YH and YL as a pointer to 1st
+000084 e0c0                           ldi YL, low (dsp_buff_1)  ; byte of dsp_buff_1 (Note - assuming 
+                                                                ; (dsp_buff_1 for now).
+000085 9105                           lpm R16, Z+               ; get dsply buff number (1st byte of msg).
+000086 3001                           cpi r16, 1                ; if equal to '1', ptr already setup.
+000087 f021                           breq get_msg_byte         ; jump and start message load.
+000088 9660                           adiw YH:YL, 16            ; else set ptr to dsp buff 2.
+000089 3002                           cpi r16, 2                ; if equal to '2', ptr now setup.
+00008a f009                           breq get_msg_byte         ; jump and start message load.
+00008b 9660                           adiw YH:YL, 16            ; else set ptr to dsp buff 2.
+                                         
+                                 get_msg_byte:
+00008c 9105                           lpm R16, Z+               ; get next byte of msg and see if '0'.        
+00008d 3000                           cpi R16, 0                ; if equal to '0', end of message reached.
+00008e f011                           breq msg_loaded           ; jump and stop message loading operation.
+00008f 9309                           st Y+, R16                ; else, store next byte of msg in buffer.
+000090 cffb                           rjmp get_msg_byte         ; jump back and continue...
+                                 msg_loaded:
+000091 9508                           ret
+                                 
+                                 
+                                 
+                                 
+                                 ;**********************************************************************
+                                 ;************* M A I N   A P P L I C A T I O N   C O D E  *************
+                                 ;**********************************************************************
+                                 
+                                 
+                                 RESET:
+000092 ef0f                          ldi r16, low(RAMEND)  ; init stack/pointer
+000093 bf0d                          out SPL, r16          ;
+000094 e008                          ldi r16, high(RAMEND) ;
+000095 bf0e                          out SPH, r16
+                                 
+                                 
+000096 ef0f                          ldi r16, 0xff     ; set portB = output.
+000097 b904                          out DDRB, r16     ; 
+000098 9a2c                          sbi portB, 4      ; set /SS of DOG LCD = 1 (Deselected)
+                                 
+                                 
+000099 df9e                          rcall init_lcd_dog    ; init display, using SPI serial interface
+00009a dfe0                          rcall clr_dsp_buffs   ; clear all three buffer lines
+                                 
+                                 
+                                    ;load_line_1 into dbuff1:
+00009b e0f1                         ldi  ZH, high(line1_testmessage<<1)  ;
+00009c e4ec                         ldi  ZL, low(line1_testmessage<<1)   ;
+00009d dfe5                         rcall load_msg          ; load message into buffer(s).
+                                 
+                                 
+00009e e0f1                         ldi  ZH, high(line2_testmessage<<1)  ;
+00009f e5ee                         ldi  ZL, low(line2_testmessage<<1)   ;
+0000a0 dfe2                         rcall load_msg          ; load message into buffer(s).
+                                 
+                                 
+0000a1 e0f1                         ldi  ZH, high(line3_testmessage<<1)  ;
+0000a2 e7e0                         ldi  ZL, low(line3_testmessage<<1)   ;
+0000a3 dfdf                         rcall load_msg          ; load message into buffer(s).
+                                 
+                                 
+0000a4 dfb1                         rcall update_lcd_dog
+                                 
+                                 
+                                 end_loop:
+0000a5 cfff                         rjmp end_loop
+                                 
+                                 
+                                 
+                                 ;**************************************************************
+                                 ;***** ALL MESSAGES: Fixed format, flash stored/loaded   ******
+                                 ;**************************************************************
+                                 
+                                 
+0000a6 5401
+0000a7 7365
+0000a8 2074
+0000a9 654d
+0000aa 7373
+0000ab 6761
+0000ac 2065
+0000ad 3030
+0000ae 0031                      line1_testmessage: .db 1, "Test Message 001", 0  ; message for line #1.
+0000af 5402
+0000b0 7365
+0000b1 2074
+0000b2 654d
+0000b3 7373
+0000b4 6761
+0000b5 2065
+0000b6 3030
+0000b7 0032                      line2_testmessage: .db 2, "Test Message 002", 0  ; message for line #2.
+0000b8 5403
+0000b9 7365
+0000ba 2074
+0000bb 654d
+0000bc 7373
+0000bd 6761
+0000be 2065
+0000bf 3030
+0000c0 0033                      line3_testmessage: .db 3, "Test Message 003", 0  ; message for line #3.
+                                 
+                                 
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+"ATmega324A" register use summary:
+x  :   0 y  :   1 z  :   6 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
+r13:   0 r14:   0 r15:   0 r16:  47 r17:   1 r18:   0 r19:   0 r20:   8 
+r21:   0 r22:   2 r23:   2 r24:   4 r25:   2 r26:   2 r27:   0 r28:   3 
+r29:   3 r30:   7 r31:   7 
+Registers used: 14 out of 35 (40.0%)
+
+"ATmega324A" instruction use summary:
+.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   2 and   :   0 
+andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   3 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
+brne  :   7 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   3 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
+cpi   :   3 cpse  :   0 dec   :   7 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   9 inc   :   0 jmp   :   0 
+ld    :   3 ldd   :   0 ldi   :  38 lds   :   0 lpm   :   2 lsl   :   0 
+lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   2 or    :   0 ori   :   0 out   :   6 pop   :   6 
+push  :   6 rcall :  41 ret   :  10 reti  :   2 rjmp  :   5 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   7 sbic  :   0 sbis  :   0 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   2 sec   :   0 seh   :   0 
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   2 std   :   0 sts   :   0 
+sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
+Instructions used: 21 out of 113 (18.6%)
+
+"ATmega324A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x000182    332     54    386   32768   1.2%
+[.dseg] 0x000100 0x000130      0     48     48    2048   2.3%
+[.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
+
+Assembly complete, 0 errors, 0 warnings

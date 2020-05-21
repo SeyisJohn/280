@@ -1,0 +1,199 @@
+
+AVRASM ver. 2.2.7  F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm Fri Oct 11 14:14:00 2019
+
+F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm(29): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm(29): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+                                 
+                                 
+                                 ;*
+                                 ;* Title:               blink_seven_seg.asm
+                                 ;* Author:              Ken Short
+                                 ;* Version:             1.0
+                                 ;* Last updated:        09/11/17
+                                 ;* Target:              ATmega324 @ 1 MHz 
+                                 ;*
+                                 ;* DESCRIPTION
+                                 ;* Reads a BCD digit from pins PD3 - PD0 and displays the value on a seven-
+                                 ;* segment display. The display is common anode and is connected to PB6 - PB0.
+                                 ;* The segments are assigned in order a through g to pins PB6 - PB0.
+                                 ;*
+                                 ;* The display is operated in pulsed mode with a 50% duty cycle. The driver
+                                 ;* transisor is a ZTX555 with its base connected through a 330 ohm resisor
+                                 ;* to PA0.
+                                 ;*
+                                 ;* r20 is used to control the refresh frequency.
+                                 ;* Increasing r20 decreases the frequency.
+                                 ;*
+                                 ;*
+                                 ;* VERSION HISTORY
+                                 ;* 1.0 Original version
+                                 ;* 2.0 Modified to user r20 rather than the memory variable delay_param
+                                 ;* 2.1 Modified for ATmega324A
+                                 ;***************************************************************************
+                                 
+                                 .list
+                                 
+                                 .cseg
+                                 reset:
+                                     ;Configure port B as an output port
+000000 ef0f                          ldi r16, $FF        ;load r16 with all 1s
+000001 b904                          out DDRB, r16       ;port B - all bits configured as outputs
+                                 
+                                     ;Configure port D as an input port
+000002 e000                          ldi r16, $00        ;load r16 with all 0s
+000003 b90a                          out DDRD, r16       ;port D - all bits configured as inputs
+000004 ef0f                          ldi r16, $FF        ;enable pull-up resistors by outputting
+000005 b90b                          out PORTD, r16      ;all 1s to PORTD
+                                 
+                                     ;Configure port A bit 0 as an output
+000006 e001                          ldi r16, $01        ;load r16 with a 1 in the bit 0 position
+000007 b901                          out DDRA, r16       ;port A - bit 0 as an output
+000008 e001                          ldi r16, $01        ;turn OFF digit driver
+000009 b902                          out PORTA, r16
+                                 
+                                     ;Inital delay value
+00000a ef4f                          ldi r20, 255         ; 32
+                                 
+                                     ;Initialize stack pointer to allow subroutine calls
+00000b ef0f                          ldi r16, LOW(RAMEND)    ;load low byte of stack pointer    
+00000c bf0d                          out SPL, r16
+00000d e008                          ldi r16, HIGH(RAMEND)   ;load high byte of stack pointer
+00000e bf0e                          out SPH, r16
+                                 
+                                 main_loop:
+00000f b129                          in r18, PIND        ;input switch values
+000010 702f                          andi r18, $0f       ;force ms nibble to 0
+                                                    
+                                 
+                                     ;Code to perform table lookup operation,
+                                     ;Nibble from switches is offset into table
+                                 bcd_7seg:
+000011 e0f0                          ldi ZH, high (hextable * 2)    ;set Z to point to start of table
+000012 e7e2                          ldi ZL, low (hextable * 2)
+000013 e000                          ldi r16, $00                ;add offset to Z pointer
+000014 0fe2                          add ZL, r18
+000015 1ff0                          adc ZH, r16
+000016 9124                          lpm r18, Z                  ;load byte from table pointed to by Z
+                                 
+                                 display:
+000017 b925                          out PORTB, r18      ;output image to seven-segment display
+000018 e000                          ldi r16, $00        ;turn ON digit
+000019 b902                          out PORTA, r16
+00001a 940e 003e                     call on_delay       ;timeout digit ON time
+00001c 940e 003e                 	call on_delay
+00001e 940e 003e                 	call on_delay
+000020 940e 003e                 	call on_delay
+000022 940e 003e                 	call on_delay
+000024 940e 003e                 	call on_delay
+000026 940e 003e                 	call on_delay
+000028 e001                          ldi r16, $01        ;turn OFF digit
+000029 b902                          out PORTA, r16
+00002a 940e 003e                     call off_delay      ;timeout digit OF time
+00002c 940e 003e                 	call off_delay
+00002e 940e 003e                 	call off_delay
+000030 940e 003e                 	call off_delay
+000032 940e 003e                 	call off_delay
+000034 940e 003e                 	call off_delay
+000036 940e 003e                 	call off_delay
+000038 cfd6                          rjmp main_loop      ;jump back to read switches again
+                                 
+                                 
+                                     ;Table of segment values to display digits 0 - F
+                                     ;!!! seven values must be added
+000039 4f01
+00003a 0612
+00003b 244c
+00003c 0f60
+F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm(99): warning: .cseg .db misalignment - padding zero byte
+00003d 0000                      hextable: .db $01, $4F, $12, $06, $4C, $24, $60, $0F, $00
+                                 
+                                 
+                                 
+                                 ;***************************************************************************
+                                 ;* 
+                                 ;* "on_delay" - On delay time interval
+                                 ;* "off_delay" - Off delay time interval
+                                 ;*
+                                 ;* Description:
+                                 ;* A single subroutine with two different names. Provides the ON time and OFF
+                                 ;* for a pulsed LED display that has a 50% duty cycle.
+                                 ;*
+                                 ;* Author:              Ken Short
+                                 ;* Version:             1.0
+                                 ;* Last updated:        09/11/17
+                                 ;* Target:              ATmega324 @ 1 MHz
+                                 ;* Number of words:
+                                 ;* Number of cycles:    123 * delay_param
+                                 ;* Low registers used:  none
+                                 ;* High registers used: r16, r17
+                                 ;*
+                                 ;* Parameters:          delay_param - outer loop control variable
+                                 ;*
+                                 ;* Notes: 
+                                 ;*
+                                 ;***************************************************************************
+                                 
+                                 on_delay:   ;delay for ATmega324 @ 1MHz
+                                 off_delay:
+00003e 2f14                          mov r17, r20		; load outer loop count
+                                 outer_loop:
+00003f ef0f                          ldi r16, 255         ; 40 inner loop is about 123 us (called twice per period)
+                                 inner_loop:
+000040 950a                          dec r16
+000041 f7f1                          brne inner_loop
+000042 951a                          dec r17
+000043 f7d9                          brne outer_loop
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+"ATmega324A" register use summary:
+x  :   0 y  :   0 z  :   1 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
+r13:   0 r14:   0 r15:   0 r16:  22 r17:   2 r18:   5 r19:   0 r20:   2 
+r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r29:   0 r30:   2 r31:   2 
+Registers used: 7 out of 35 (20.0%)
+
+"ATmega324A" instruction use summary:
+.lds  :   0 .sts  :   0 adc   :   1 add   :   1 adiw  :   0 and   :   0 
+andi  :   1 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
+brne  :   2 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :  14 cbi   :   0 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
+cpi   :   0 cpse  :   0 dec   :   2 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   0 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  14 lds   :   0 lpm   :   2 lsl   :   0 
+lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  10 pop   :   0 
+push  :   0 rcall :   0 ret   :   1 reti  :   0 rjmp  :   1 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
+sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
+Instructions used: 13 out of 113 (11.5%)
+
+"ATmega324A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x00008a    128     10    138   32768   0.4%
+[.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
+[.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
+
+Assembly complete, 0 errors, 1 warnings

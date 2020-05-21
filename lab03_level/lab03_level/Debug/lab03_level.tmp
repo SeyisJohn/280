@@ -1,0 +1,31 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.7</VERSION>
+ <DEVICE>"ATmega324A"</DEVICE>
+ <WORKING_DIR>F:\lab03_level\lab03_level\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>F:\lab03_level\lab03_level\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>F:\lab03_level\lab03_level\Debug\lab03_level.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>lab03_level.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>lab03_level.map</FILE>
+  <FILE>lab03_level.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <reset><FILE>F:\lab03_level\lab03_level\main.asm</FILE><LINE>14</LINE></reset>
+  <main_loop><FILE>F:\lab03_level\lab03_level\main.asm</FILE><LINE>24</LINE></main_loop>
+  <next_bit><FILE>F:\lab03_level\lab03_level\main.asm</FILE><LINE>30</LINE></next_bit>
+  <dec_bitcounter><FILE>F:\lab03_level\lab03_level\main.asm</FILE><LINE>36</LINE></dec_bitcounter>
+  <table><FILE>F:\lab03_level\lab03_level\main.asm</FILE><LINE>43</LINE></table>
+ </LABELS>
+</ASSEMBLER_INFO>

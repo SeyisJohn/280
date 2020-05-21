@@ -1,0 +1,35 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.7</VERSION>
+ <DEVICE>"ATmega324A"</DEVICE>
+ <WORKING_DIR>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\Debug\lab04_blink_seven_seg.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>lab04_blink_seven_seg.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>lab04_blink_seven_seg.map</FILE>
+  <FILE>lab04_blink_seven_seg.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <reset><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>33</LINE></reset>
+  <main_loop><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>59</LINE></main_loop>
+  <bcd_7seg><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>66</LINE></bcd_7seg>
+  <hextable><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>99</LINE></hextable>
+  <display><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>74</LINE></display>
+  <on_delay><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>127</LINE></on_delay>
+  <off_delay><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>128</LINE></off_delay>
+  <outer_loop><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>130</LINE></outer_loop>
+  <inner_loop><FILE>F:\lab04_blink_seven_seg\lab04_blink_seven_seg\main.asm</FILE><LINE>132</LINE></inner_loop>
+ </LABELS>
+</ASSEMBLER_INFO>

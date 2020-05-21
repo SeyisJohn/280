@@ -1,0 +1,105 @@
+
+AVRASM ver. 2.2.7  F:\lab03_level\lab03_level\main.asm Fri Oct 04 14:32:20 2019
+
+F:\lab03_level\lab03_level\main.asm(11): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\lab03_level\lab03_level\main.asm(11): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+                                 
+                                 
+                                 ; lab03_level.asm
+                                 ;
+                                 ; Created: 10/4/2019 1:50:22 PM
+                                 ; Author : user38x
+                                 ;
+                                 
+                                 
+                                 ; Replace with your application code
+                                 .list
+                                 
+                                 reset:
+                                 
+000000 ef0f                      	ldi r16, $FF
+000001 b904                      	out DDRB, r16
+                                 
+000002 e000                      	ldi r16, $00
+000003 b90a                      	out DDRD, r16
+000004 ef0f                      	ldi r16, $FF
+000005 b90b                      	out PORTD, r16
+                                 
+                                 main_loop:
+000006 b109                      	in r16, PIND
+                                 
+000007 e018                      	ldi r17, 8
+000008 e020                      	ldi r18, $00
+                                 
+                                 next_bit:
+                                 
+000009 0f00                      	lsl r16
+00000a f408                      	brcc dec_bitcounter
+00000b 9527                      	ror r18
+                                 
+                                 dec_bitcounter:
+00000c 951a                      	dec r17
+00000d f7d9                      	brne next_bit
+00000e 9520                      	com r18
+00000f b925                      	out PORTB, r18
+000010 cff5                      	rjmp main_loop
+                                 
+000011 4f01
+000012 0612
+000013 244c
+000014 0f60
+F:\lab03_level\lab03_level\main.asm(43): warning: .cseg .db misalignment - padding zero byte
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+"ATmega324A" register use summary:
+x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
+r13:   0 r14:   0 r15:   0 r16:   8 r17:   2 r18:   4 r19:   0 r20:   0 
+r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r29:   0 r30:   0 r31:   0 
+Registers used: 3 out of 35 (8.6%)
+
+"ATmega324A" instruction use summary:
+.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
+andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   1 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
+brne  :   1 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   1 cp    :   0 cpc   :   0 
+cpi   :   0 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   0 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :   5 lds   :   0 lpm   :   0 lsl   :   1 
+lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   4 pop   :   0 
+push  :   0 rcall :   0 ret   :   0 reti  :   0 rjmp  :   1 rol   :   0 
+ror   :   1 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
+sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
+Instructions used: 10 out of 113 (8.8%)
+
+"ATmega324A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x00002c     34     10     44   32768   0.1%
+[.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
+[.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
+
+Assembly complete, 0 errors, 1 warnings
