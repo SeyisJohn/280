@@ -1,0 +1,194 @@
+
+AVRASM ver. 2.2.7  F:\Lab 7\keypad_test\keypad_test\main.asm Fri Nov 01 15:07:51 2019
+
+F:\Lab 7\keypad_test\keypad_test\main.asm(15): Including file 'C:/Program Files (x86)\Atmel\Studio
+\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\Lab 7\keypad_test\keypad_test\main.asm(120): Including file 'F:\Lab 7\keypad_test\keypad_test
+\lcd_dog_asm_driver_m324a.inc'
+F:\Lab 7\keypad_test\keypad_test\main.asm(15): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs
+\atmel\ATmega_DFP\1.2.209\avrasm\inc\m324adef.inc'
+F:\Lab 7\keypad_test\keypad_test\main.asm(120): Including file 'F:\Lab 7\keypad_test\keypad_test
+\lcd_dog_asm_driver_m324a.inc'
+                                 
+                                 
+                                 ;*
+                                 ;* Title: Keypad test
+                                 ;* Author: Bassel El Amine & Seyi Olajuyi
+                                 ;* Version: 1.0
+                                 ;* Last updated: Oct 31, 2019
+                                 ;* 
+                                 ;* DESCRIPTION:
+                                 ;* The purpose of this code is to use a table lookup to map the key scan sco
+								 des of a 4x4 Keypad
+                                 ;* to the desired key values.
+                                 ;* VERSION HISTORY
+                                 ;* 1.0 Original version
+                                 ;***************************************************************************
+                                 .list
+                                 
+                                      .CSEG
+                                 
+                                 
+                                      ; interrupt vector table, with several 'safety' stubs
+000000 c00a                           rjmp RESET      ;Reset/Cold start vector
+000001 9518                           reti            ;External Intr0 vector
+000002 9518                           reti            ;External Intr1 vector
+                                 
+                                 ;---------------------------- SUBROUTINES ----------------------------
+                                 
+                                 ;************************
+                                 ;NAME:      clr_dsp_buffs
+                                 ;FUNCTION:  Initializes dsp_buffers 1, 2, and 3 with blanks (0x20)
+                                 ;ASSUMES:   Three CONTIGUOUS 16-byte dram based buffers named
+                                 ;           dsp_buff_1, dsp_buff_2, dsp_buff_3.
+                                 ;RETURNS:   nothing.
+                                 ;MODIFIES:  r25,r26, Z-ptr
+                                 ;CALLS:     none
+                                 ;CALLED BY: main application and diagnostics
+                                 ;********************************************************************
+                                 clr_dsp_buffs:
+000003 e390                           ldi R25, 48               ; load total length of both buffer.
+000004 e2a0                           ldi R26, ' '              ; load blank/space into R26.
+000005 e0f1                           ldi ZH, high (dsp_buff_1) ; Load ZH and ZL as a pointer to 1st
+000006 e0e0                           ldi ZL, low (dsp_buff_1)  ; byte of buffer for line 1.
+                                    
+                                     ;set DDRAM address to 1st position of first line.
+                                 store_bytes:
+000007 93a1                           st  Z+, R26       ; store ' ' into 1st/next buffer byte and
+                                                        ; auto inc ptr to next location.
+000008 959a                           dec  R25          ; 
+000009 f7e9                           brne store_bytes  ; cont until r25=0, all bytes written.
+00000a 9508                           ret
+                                 
+                                 
+                                 	
+                                 ;**********************************************************************
+                                 ;************* M A I N   A P P L I C A T I O N   C O D E  *************
+                                 ;**********************************************************************
+                                 
+                                 
+                                 RESET:
+00000b ef0f                          ldi r16, low(RAMEND)  ; init stack/pointer
+00000c bf0d                          out SPL, r16          ;
+00000d e008                          ldi r16, high(RAMEND) ;
+00000e bf0e                          out SPH, r16
+                                 
+                                 
+00000f ef0f                          ldi r16, $ff     ; load r16 with all 1s.
+000010 b904                          out DDRB, r16     ; set portB = output
+000011 e010                      	ldi r17, $00	  ; load r17 with all 0s.
+000012 b91a                      	out DDRD, r17	  ; set portD = input
+000013 e00f                      	ldi r16, $0f
+000014 b90b                      	out PORTD, r16    ; enable pull-up resistor on PD0-PD3
+000015 e820                      	ldi r18, $80	  ; load r18 with $80
+000016 b927                      	out DDRC, r18     ; set pin 6 to input & set pin 7 to output
+(also set all other pins to input)
+000017 9847                      	cbi PORTC, 7	  ; activate CLR on Flip Flop
+000018 9a47                      	sbi PORTC, 7      ; Deactivate CLR on Flip Flop
+000019 9a2c                          sbi portB, 4      ; set /SS of DOG LCD = 1 (Deselected)
+                                 
+                                 
+00001a d056                          rcall init_lcd_dog        ; init display, using SPI serial
+ interface
+00001b dfe7                          rcall clr_dsp_buffs       ; clear all three buffer lines
+00001c d072                      	rcall update_lcd_dog      ; update the display
+                                 
+                                 reset_buffer:
+00001d e0d1                      	ldi YH, high (dsp_buff_1) ; Load YH and YL as a pointer to 1st
+00001e e0c0                          ldi YL, low (dsp_buff_1)  ; byte of dsp_buff_1 (Note - assuming 
+                                                               ; (dsp_buff_1 for now).
+00001f e320                      	ldi r18, 48				  ; Load 48 into r18
+                                 
+                                 check_flag:
+000020 9b36                      	sbis PINC, 6		   ;check if the push button is pushed		
+000021 cffe                      	rjmp check_flag
+                                 
+000022 b159                      	in r21, PIND           ;store the PIND in r21
+000023 7f50                      	andi r21, $f0
+000024 9552                      	swap r21
+000025 d007                      	rcall lookup
+000026 9359                      	st Y+, r21             ;send r21 to Y pointer
+000027 d067                      	rcall update_lcd_dog   ;update the display
+000028 9847                      	cbi PORTC, 7		   ;activate the flip-flop
+000029 9a47                      	sbi PORTC, 7		   ;deactivate the flip-flop
+00002a 952a                      	dec r18				   ;decrement r18
+00002b f7a1                      	brne check_flag		   ;check if r18 is equal to 0
+00002c cff0                      	rjmp reset_buffer	   ;reset the buffer 
+                                 
+                                 lookup:
+00002d e0f0                      	ldi ZH, high (table * 2)		;set Z to point to start of table 
+00002e e6e8                      	ldi ZL, low (table * 2)
+00002f e000                      	ldi r16, $00					;add offset to Z pointer 
+000030 0fe5                      	add ZL, r21						;originally r18
+000031 0ff0                      	add ZH, r16
+000032 9154                      	lpm r21, Z	
+000033 9508                      	ret
+                                 	
+                                 ;table: .db $31, $32, $33, $46, $34, $35, $36, $45, $37, $38, $39, 
+								 $44, $41, $30, $42, $43
+000034 3130
+000035 3332
+000036 3534
+000037 3736
+000038 3938
+000039 4241
+00003a 4443
+00003b 4645                      table: .db "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A",
+ "B", "C", "D", "E", "F"
+                                 
+                                       
+                                 
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+"ATmega324A" register use summary:
+x  :   0 y  :   1 z  :   5 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
+r13:   0 r14:   0 r15:   0 r16:  45 r17:   3 r18:   4 r19:   0 r20:   8 
+r21:   6 r22:   2 r23:   2 r24:   4 r25:   2 r26:   2 r27:   0 r28:   1 
+r29:   1 r30:   6 r31:   6 
+Registers used: 16 out of 35 (45.7%)
+
+"ATmega324A" instruction use summary:
+.lds  :   0 .sts  :   0 adc   :   0 add   :   2 adiw  :   0 and   :   0 
+andi  :   1 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
+brne  :   8 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   5 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
+cpi   :   0 cpse  :   0 dec   :   8 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :  10 inc   :   0 jmp   :   0 
+ld    :   3 ldd   :   0 ldi   :  39 lds   :   0 lpm   :   2 lsl   :   0 
+lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   2 or    :   0 ori   :   0 out   :   9 pop   :   6 
+push  :   6 rcall :  40 ret   :  10 reti  :   2 rjmp  :   5 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   9 sbic  :   0 sbis  :   1 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   2 sec   :   0 seh   :   0 
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   2 std   :   0 sts   :   0 
+sub   :   0 subi  :   0 swap  :   1 tst   :   0 wdr   :   0 
+Instructions used: 22 out of 113 (19.5%)
+
+"ATmega324A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x000168    344     16    360   32768   1.1%
+[.dseg] 0x000100 0x000130      0     48     48    2048   2.3%
+[.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
+
+Assembly complete, 0 errors, 0 warnings
